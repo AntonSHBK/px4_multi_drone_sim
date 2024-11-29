@@ -1,0 +1,23 @@
+name: px4_multi_drone_sim
+
+services:
+  ros-humble-master:
+    # mem_limit: 4G  # выделение до 4 гигабайт памяти
+    # cpus: 2.0  # ограничение до двух процессорных ядер   
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ../:/workspace/src/px4_multi_drone_sim
+    env_file:
+      - ./.env
+    ports:
+      - "14540:14540/udp"  # PX4 MAVLink UDP порт
+      - "8888:8888/udp"    # Micro XRCE-DDS Agent порт
+    networks:
+      - robot_network
+    tty: true
+
+networks:
+  robot_network:
+    driver: bridge

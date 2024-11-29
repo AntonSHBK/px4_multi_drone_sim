@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>multi_drone</name>
+  <version>0.1.0</version>
+  <description>Package for multi-drone simulation with Gazebo Garden and PX4</description>
+
+  <maintainer email="anton42@yandex.ru">Anton Pisarenko</maintainer>
+  <license>MIT</license>
+
+  <!-- Зависимости для работы с ROS 2 -->
+  <depend>rclpy</depend>
+  <depend>ros_gz_sim</depend>
+  <depend>launch_ros</depend>
+  <depend>geometry_msgs</depend>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Дополнительные зависимости -->
+  <depend>ament_index_python</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,51 @@
+# Локальные координаты ENU
+geometry_msgs/Vector3 next_position_local_enu
+geometry_msgs/Vector3 next_velocity_local_enu
+
+geometry_msgs/Vector3 current_position_local_enu
+geometry_msgs/Vector3 current_velocity_local_enu
+
+# Локальные координаты NED
+geometry_msgs/Vector3 next_position_local_ned
+geometry_msgs/Vector3 next_velocity_local_ned
+
+geometry_msgs/Vector3 current_position_local_ned
+geometry_msgs/Vector3 current_velocity_local_ned
+
+# Глобальные координаты ENU
+geometry_msgs/Vector3 next_position_global_enu
+geometry_msgs/Vector3 next_velocity_global_enu
+
+geometry_msgs/Vector3 current_position_global_enu
+geometry_msgs/Vector3 current_velocity_global_enu
+
+# Глобальные координаты NED
+geometry_msgs/Vector3 next_position_global_ned
+geometry_msgs/Vector3 next_velocity_global_ned
+
+geometry_msgs/Vector3 current_position_global_ned
+geometry_msgs/Vector3 current_velocity_global_ned
+
+# Ориентация
+float64 next_yaw_enu
+float64 current_yaw_enu
+float64 next_yaw_ned
+float64 current_yaw_ned
+
+# Навигационное состояние и состояние арминга
+uint8 nav_state
+uint8 arm_state
+
+# Прочие состояния
+bool offboard_mode
+bool flight_check
+bool arm_message
+bool failsafe
+
+# Допустимые погрешности
+float64 position_tolerance
+float64 orientation_tolerance
+
+# Состояние
+string current_state
+string last_state
