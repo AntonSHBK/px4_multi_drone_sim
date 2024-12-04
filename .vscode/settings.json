@@ -1,0 +1,17 @@
+{
+    "cmake.sourceDirectory": "D:/Projects/ROS-Multiagent-Robotics-System/basic_mobile_robot",
+    "python.autoComplete.extraPaths": [
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "/workspace/install/px4_msgs/local/lib/python3.10/dist-packages",
+        "/workspace/src/px4_multi_drone_sim",
+        "/workspace/src/ROS-Multiagent-Robotics-System"
+    ],
+    "python.analysis.extraPaths": [
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "/workspace/install/px4_msgs/local/lib/python3.10/dist-packages",
+        "/workspace/src/px4_multi_drone_sim",
+        "/workspace/src/ROS-Multiagent-Robotics-System"
+    ]
+}

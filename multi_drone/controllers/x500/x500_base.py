@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 
 import json
-from dataclasses import dataclass
-from tracemalloc import stop
 
-from sympy import im
-from geometry_msgs.msg import Point, Vector3
+# from geometry_msgs.msg import Point, Vector3
 import numpy as np
 
 import rclpy
@@ -21,65 +18,45 @@ from px4_msgs.msg import (
     VehicleLocalPosition
 )
 
-from multirobots.scripts.controllers.base_controller import BaseDroneController
+from  multi_drone.controllers.base_controller import BaseDroneController
+from  multi_drone.controllers.base_data import DronData
 
-from multirobots.scripts.move_commands import get_g_command_class
-from multirobots.scripts.move_commands.base_command import BaseGCommand
+# from multirobots.scripts.controllers.base_controller import BaseDroneController
 
-from control_system.scripts.utils.methods import enu_to_ned
-from control_system.scripts.utils.methods import ned_to_enu
-from control_system.scripts.utils.methods import global_to_local
-from control_system.scripts.utils.methods import local_to_global
-from control_system.scripts.utils.methods import calculate_yaw_towards_target
+# from multirobots.scripts.move_commands import get_g_command_class
+# from multirobots.scripts.move_commands.base_command import BaseGCommand
 
-from robots_service.msg import RobotState
+# from control_system.scripts.utils.methods import enu_to_ned
+# from control_system.scripts.utils.methods import ned_to_enu
+# from control_system.scripts.utils.methods import global_to_local
+# from control_system.scripts.utils.methods import local_to_global
+# from control_system.scripts.utils.methods import calculate_yaw_towards_target
+
+# from robots_service.msg import RobotState
 
 
-class X500Controller(BaseDroneController):
+class X500BaseController(BaseDroneController):
         
-    def __init__(self):
-                    
-        super().__init__('x500')
+    def __init__(
+        self,
+        drone_id: int,
+        default_position=[0.0,0.0,0.0],  # Позиция задаётся списком [x, y, z] метры
+        default_orientation=[0.0,0.0,0.0],  # Ориентация задаётся списком [roll, pitch, yaw] радианы
+    ):                    
+        super().__init__(drone_id, 'x500', default_position, default_orientation)       
         
-        self.get_logger().info(f"Инициализация дрона с ID {self.drone_id}, тип {self.drone_type}, позиция {self.default_world_position_ENU}")
+        self.log_info(f"Инициализация дрона с ID {self.drone_id}, тип {self.drone_type}, позиция {self.default_world_position_ENU}")
 
+        self._init_params()
+        self._init_subscribers()
+        self._init_publisher()     
+        
+        # self.set_home_to_current_position()
+        
+        
+    def _init_params(self):
         self.nav_state = VehicleStatus.NAVIGATION_STATE_MAX
         self.arm_state = VehicleStatus.ARMING_STATE_ARMED
-        
-        # NED - СК дрона
-        # ENU - СК мира
-        
-        # Локальные значения        
-        self.next_position_local_ENU = Vector3(x=0.0, y=0.0, z=0.0)
-        self.next_velocity_local_ENU = Vector3(x=0.0, y=0.0, z=0.0)
-        
-        self.next_position_local_NED = Vector3(x=0.0, y=0.0, z=-2.5)
-        self.next_velocity_local_NED = Vector3(x=0.0, y=0.0, z=0.0)
-        
-        self.current_position_local_ENU = Vector3(x=0.0, y=0.0, z=0.0)
-        self.current_velocity_local_ENU = Vector3(x=0.0, y=0.0, z=0.0)
-        
-        self.current_position_local_NED = Vector3(x=0.0, y=0.0, z=0.0)
-        self.current_velocity_local_NED = Vector3(x=0.0, y=0.0, z=0.0)
-        
-        # Глобальные значения        
-        self.next_position_global_ENU = Vector3(x=0.0, y=0.0, z=0.0)
-        self.next_velocity_global_ENU = Vector3(x=0.0, y=0.0, z=0.0)
-        
-        self.next_position_global_NED = Vector3(x=0.0, y=0.0, z=0.0)
-        self.next_velocity_global_NED = Vector3(x=0.0, y=0.0, z=0.0)
-        
-        self.current_position_global_ENU = Vector3(x=0.0, y=0.0, z=0.0)
-        self.current_velocity_global_ENU = Vector3(x=0.0, y=0.0, z=0.0)
-        
-        self.current_position_global_NED = Vector3(x=0.0, y=0.0, z=0.0)
-        self.current_velocity_global_NED = Vector3(x=0.0, y=0.0, z=0.0)
-                
-        self.next_yaw_ENU = 0.0       
-        self.current_yaw_ENU = 0.0
-        
-        self.next_yaw_NED = 0.0        
-        self.current_yaw_NED = 0.0
         
         self.offboardMode = False
         self.flightCheck = False
@@ -87,12 +64,23 @@ class X500Controller(BaseDroneController):
         self.arm_message = False
         self.failsafe = False
         
+        self.current_state = "IDLE"
+        
         self.position_tolerance = 0.1  # Допустимая погрешность для позиции (в метрах)
         self.orientation_tolerance = 0.05  # Допустимая погрешность для ориентации (в радианах)
         
-        self.current_state = "IDLE"
-        self.last_state = self.current_state
+        self.current_position = DronData()
+        self.next_position = DronData()
         
+        self.last_state = self.current_state       
+        
+        self.control_mode = "trajectory"
+        
+        self.commands_data_list = []
+        self.current_command_idx = 0
+        self.last_sent_trajectory = None   
+        
+    def _init_timers(self):
         timer_arm_period = 0.5
         self.timer_arm = self.create_timer(
             timer_arm_period, self.timer_arm_callback)
@@ -109,12 +97,7 @@ class X500Controller(BaseDroneController):
         self.timer_robot_of_state = self.create_timer(
             timer_robot_of_state_period, self.timer_robot_of_state_callback)
         
-        self.control_mode = "trajectory"
-        
-        self.commands_data_list = []
-        self.current_command_idx = 0
-        self.last_sent_trajectory = None
-        
+    def _init_subscribers(self):
         self.subscriber_arm_message = self.create_subscription(
             Bool,
             f'{self.prefix_name}/arm_message',
@@ -153,14 +136,15 @@ class X500Controller(BaseDroneController):
         self.subscriber_vehicle_attitude = self.create_subscription(
             VehicleAttitude,
             f'{self.prefix_px}/fmu/out/vehicle_attitude',
-            self.attitude_callback,
+            self.callback_vehicle_attitude,
             self.qos_profile_unreliable
         )
         
+    def _init_publisher(self):
         self.local_position_sub = self.create_subscription(
             VehicleLocalPosition,
             f'{self.prefix_px}/fmu/out/vehicle_local_position',
-            self.local_position_callback,
+            self.callback_local_position,
             self.qos_profile_unreliable
         )        
         
@@ -194,8 +178,7 @@ class X500Controller(BaseDroneController):
             self.qos_profile_reliable
         )
         
-        self.set_home_to_current_position()
-
+        
     def timer_arm_callback(self):
         # self.get_logger().info(f"Текущее состояние: {self.current_state}, состояние арминга: {self.arm_state}, навигационное состояние: {self.nav_state}")
 
@@ -543,7 +526,7 @@ class X500Controller(BaseDroneController):
         return position_within_tolerance
 
     # Callback-функция для получения текущих значений траектории и извлечения угла рыскания
-    def attitude_callback(self, msg: VehicleAttitude):
+    def callback_vehicle_attitude(self, msg: VehicleAttitude):
         """
         Обработчик для получения ориентации yaw дрона в системе ENU и преобразования в NED.
         """
@@ -552,7 +535,7 @@ class X500Controller(BaseDroneController):
                                   1.0 - 2.0 * (orientation_q[1] * orientation_q[1] + orientation_q[2] * orientation_q[2])))        
         self.current_yaw_NED = -self.current_yaw_ENU
     
-    def local_position_callback(self, msg: VehicleLocalPosition):
+    def callback_local_position(self, msg: VehicleLocalPosition):
         """
         Получение локальных координат дрона и высоты, обработка скоростей
         в системах координат NED и ENU.
@@ -797,20 +780,7 @@ class X500Controller(BaseDroneController):
         """Отправляем команду на посадку дрона."""
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
         self.get_logger().info("Команда на посадку отправлена")
-        
-    def publish_vehicle_command(self, command, param1=0.0, param2=0.0, param7=5.0):
-        msg = VehicleCommand()
-        msg.param1 = param1  # Первичный параметр команды. Его значение зависит от типа команды (например, для команды армирования это может быть 1.0 для арма и 0.0 для дизарма)
-        msg.param2 = param2  # Вторичный параметр команды. Используется в некоторых командах для дополнительной информации (например, для некоторых команд это может быть направление или время)
-        msg.param7 = param7  # Значение высоты для команды на взлет (например, при взлёте указывает желаемую высоту в метрах)
-        msg.command = command  # ID команды (например, команда армирования, взлёта, перехода в Offboard и т.д.)
-        msg.target_system = self.drone_id  + 1 # Система, которая должна выполнить команду (обычно 1 для основного контроллера)
-        msg.target_component = 1  # Компонент, который должен выполнить команду (обычно 1 для основного компонента)
-        msg.source_system = self.drone_id  # Система, отправляющая команду (указываем 1, если команда отправляется с основного контроллера)
-        msg.source_component = 1  # Компонент, отправляющий команду (обычно 1)
-        msg.from_external = True  # Флаг, показывающий, что команда отправлена извне
-        msg.timestamp = int(Clock().now().nanoseconds / 1000)  # Время отправки команды в микросекундах
-        self.publisher_vehicle_command.publish(msg)  # Публикация команды)
+
 
 def main(args=None):
     rclpy.init(args=args)    
