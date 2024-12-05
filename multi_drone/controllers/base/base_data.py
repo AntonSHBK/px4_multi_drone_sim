@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -9,8 +7,7 @@ from multi_drone.utils.geometry import (
     rotate_ENU_NED,
     rotated_ENU_NED_quaternion,
     transform_coordinates,
-    transform_orientation
-    
+    transform_orientation    
 )
 
 

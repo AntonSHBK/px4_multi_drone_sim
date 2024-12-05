@@ -35,8 +35,8 @@ install(
 )
 
 install(
-  DIRECTORY g_code/
-  DESTINATION lib/python3.10/site-packages/${PROJECT_NAME}/g_code
+  DIRECTORY move_commands/
+  DESTINATION lib/python3.10/site-packages/${PROJECT_NAME}/move_commands
   USE_SOURCE_PERMISSIONS
 )
 

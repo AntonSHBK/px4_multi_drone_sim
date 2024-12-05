@@ -20,13 +20,13 @@ from px4_msgs.msg import (
     VehicleLocalPosition
 )
 
-from multi_drone.controllers.base_data import (
+from multi_drone.controllers.base.base_data import (
     PositionData,
     OrientationData,
     VelocityData,
 )
 
-class DroneState():
+class DroneLocalityState():
     # NED - СК дрона
     # ENU - СК мира
     def __init__(
@@ -53,8 +53,17 @@ class DroneState():
         self.world_position_ENU = world_position
         self.world_orientation_ENU = world_orientation  
         
-        self.current_yaw_NED = 0.0
-        self.current_yaw_ENU = 0.0 
+        self.yaw_NED = 0.0
+        self.yaw_ENU = 0.0 
+        
+    def get_position(self):
+        pass
+    
+    def get_velocity(self):
+        pass
+    
+    def get_orientation(self):
+        pass
 
     def update_position(self, array_p:np.ndarray):  
         
@@ -87,7 +96,7 @@ class DroneState():
         
     def update_orientation(self, array_q:np.ndarray):
         
-        # Пока не уверен что нужно
+        # Пока не уверен что нужно и нужно проверить расчёт
         
         # self.orientation_local_NED.update_from_quaternion_array(array_q)
         
@@ -101,9 +110,9 @@ class DroneState():
         # self.orientation_global_NED.update_from_quaternion_array(
         #     self.orientation_global_ENU.quaternion.to_NED())
         
-        self.current_yaw_ENU = float(np.arctan2(2.0 * (array_q[3] * array_q[2] + array_q[0] * array_q[1]), 
+        self.yaw_ENU = float(np.arctan2(2.0 * (array_q[3] * array_q[2] + array_q[0] * array_q[1]), 
                                   1.0 - 2.0 * (array_q[1] * array_q[1] + array_q[2] * array_q[2])))        
-        self.current_yaw_NED = -self.current_yaw_ENU
+        self.yaw_NED = -self.yaw_ENU
 
 
 class BaseDroneController(Node):
@@ -125,11 +134,11 @@ class BaseDroneController(Node):
             yaw=default_orientation[2]
         )
         
-        self.current_position = DroneState(
+        self.current_position = DroneLocalityState(
             self.default_world_position_ENU,
             self.default_world_orientation_ENU
         )
-        self.target_position = DroneState(
+        self.target_position = DroneLocalityState(
             self.default_world_position_ENU,
             self.default_world_orientation_ENU
         )
