@@ -13,8 +13,6 @@ from rclpy.qos import (
 )
 
 from px4_msgs.msg import (
-    OffboardControlMode, 
-    TrajectorySetpoint, 
     VehicleAttitude, 
     VehicleCommand,
     VehicleLocalPosition
@@ -142,7 +140,7 @@ class BaseDroneController(Node):
             self.default_world_position_ENU,
             self.default_world_orientation_ENU
         )
-        
+                
         self.drone_id = drone_id
         self.drone_type = drone_type
         
@@ -158,7 +156,7 @@ class BaseDroneController(Node):
         self.qos_profile_reliable = self.get_qos_profile(
             reliable=True, depth=10
         )  
-        
+             
         # self.delta_position = Vector3(x=0.0, y=0.0, z=0.0)
         # self.delta_orientation = Vector3(x=0.0, y=0.0, z=0.0)  
         
@@ -188,17 +186,6 @@ class BaseDroneController(Node):
         # )        
         
     def _init_publisher(self):
-        self.publisher_offboard_mode = self.create_publisher(
-            OffboardControlMode,
-            f'{self.prefix_px}/fmu/in/offboard_control_mode',
-            self.qos_profile_reliable
-        )
-        
-        self.publisher_trajectory = self.create_publisher(
-            TrajectorySetpoint,
-            f'{self.prefix_px}/fmu/in/trajectory_setpoint',
-            self.qos_profile_reliable
-        )
         
         self.publisher_vehicle_command = self.create_publisher(
             VehicleCommand,
@@ -314,7 +301,7 @@ class BaseDroneController(Node):
     def log_info(self, message):
         self.get_logger().info(message)
         
-        
+      
 def main(args=None):
     rclpy.init(args=args)    
     control_node = BaseDroneController(1, 'x500')

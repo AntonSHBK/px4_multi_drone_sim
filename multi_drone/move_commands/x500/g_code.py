@@ -2,177 +2,102 @@
 
 import numpy as np
 
-from px4_msgs.msg import TrajectorySetpoint
-
-from multirobots.scripts.move_commands.base_command import BaseGCommand
-
-class G0_Stop(BaseGCommand):
-    def __init__(self, counter):
-        super().__init__("G0", counter)
-
-    def to_dict(self):
-        return {"name": self.name, "counter": self.counter_command}
-
-    def from_dict(self, data):
-        self.counter_command = data.get("counter", self.counter_command)
-
-
-class G1_StartWork(BaseGCommand):
-    def __init__(self, counter):
-        super().__init__("G1", counter)
-
-    def to_dict(self):
-        return {"name": self.name, "counter": self.counter_command}
-
-    def from_dict(self, data):
-        self.counter_command = data.get("counter", self.counter_command)
-
-
-class G2_EndWork(BaseGCommand):
-    def __init__(self, counter):
-        super().__init__("G2", counter)
-
-    def to_dict(self):
-        return {"name": self.name, "counter": self.counter_command}
-
-    def from_dict(self, data):
-        self.counter_command = data.get("counter", self.counter_command)
-
-
-class G3_Disarm(BaseGCommand):
-    def __init__(self, counter):
-        super().__init__("G3", counter)
-
-    def to_dict(self):
-        return {"name": self.name, "counter": self.counter_command}
-
-    def from_dict(self, data):
-        self.counter_command = data.get("counter", self.counter_command)
-
-
-class G4_Arm(BaseGCommand):
-    def __init__(self, counter):
-        super().__init__("G4", counter)
-
-    def to_dict(self):
-        return {"name": self.name, "counter": self.counter_command}
-
-    def from_dict(self, data):
-        self.counter_command = data.get("counter", self.counter_command)
+from multi_drone.move_commands.base.base_g_code import BaseGCommand
 
 
 class G20_MoveToPoint(BaseGCommand):
     """
     Команда для перемещения дрона к одной заданной точке с возможностью указания угла ориентации (yaw) и скорости.
-
-    Аргументы конструктора:
-        counter (int): Порядковый номер команды.
-        x, y, z (float): Координаты целевой точки.
-        yaw (float): Угол ориентации (yaw) в радианах. Если не указан, оставляется NaN (по умолчанию `float('nan')`).
-        velocity (float): Скорость перемещения к точке. Если не указана, оставляется NaN (по умолчанию `float('nan')`).
-
-    Переменные:
-        trajectory_setpoint_list (list[TrajectorySetpoint]): Список точек траектории. Для данной команды состоит из одной точки.
-        yaw (float): Угол yaw для ориентации дрона в конечной точке.
-        velocity (float): Скорость движения дрона к заданной точке.
-
-    Подход:
-        1. Задаются координаты конечной точки, угол ориентации (yaw) и скорость (velocity).
-        2. Инициализируется единственный объект `TrajectorySetpoint`, содержащий параметры движения к заданной точке.
-        3. Если yaw или velocity не указаны, оставляются NaN.
-        4. Объект `TrajectorySetpoint` сохраняется в `trajectory_setpoint_list`.
     """
     def __init__(self, 
-                 counter, 
-                 x=float('nan'), 
-                 y=float('nan'), 
-                 z=float('nan'), 
-                 yaw=float('nan'),
-                 velocity=float('nan')):
+                 counter: int, 
+                 x: float = float('nan'), 
+                 y: float = float('nan'), 
+                 z: float = float('nan'), 
+                 yaw: float = float('nan'),
+                 velocity: float = float('nan')):
         super().__init__("G20", counter)
         self.x = x
         self.y = y
         self.z = z
         self.yaw = yaw
-        self.velocity = velocity  # Новое поле для скорости
+        self.velocity = velocity
 
-        # Инициализируем список точек траектории с одним объектом TrajectorySetpoint
-        self.init_trajectory_setpoint_list()
+    def execute(self, controller):
+        """
+        Отправляет команду перемещения к указанной точке через контроллер.
+        """
+        if not self.complete:
+            target_position = [self.x, self.y, self.z]
+            controller.move_to_point(
+                position=target_position,
+                yaw=self.yaw,
+                velocity=self.velocity
+            )
 
-    def to_dict(self):
+    def is_complete(self, controller) -> bool:
+        """
+        Проверяет, достиг ли дрон целевой точки.
+        """
+        current_position = controller.get_current_position()
+        target_position = np.array([self.x, self.y, self.z])
+        yaw_tolerance = 0.1  # Радианы
+        position_tolerance = 0.1  # Метры
+
+        # Проверка позиции
+        position_error = np.linalg.norm(current_position - target_position)
+        if position_error > position_tolerance:
+            return False
+
+        # Проверка yaw, если он задан
+        if not np.isnan(self.yaw):
+            current_yaw = controller.get_current_yaw()
+            yaw_error = abs(current_yaw - self.yaw)
+            if yaw_error > yaw_tolerance:
+                return False
+
+        self.complete = True
+        return True
+
+    def to_dict(self) -> dict:
+        """
+        Сериализует команду в словарь.
+        """
         return {
-            "name": self.name,
-            "counter": self.counter_command,
+            **super().to_dict(),
             "x": self.x,
             "y": self.y,
             "z": self.z,
             "yaw": self.yaw,
-            "velocity": self.velocity  # Добавляем скорость в словарь
+            "velocity": self.velocity
         }
 
-    def from_dict(self, data):
-        self.counter_command = data.get("counter", self.counter_command)
-        self.x = data.get("x", self.x)
-        self.y = data.get("y", self.y)
-        self.z = data.get("z", self.z)
-        self.yaw = data.get("yaw", self.yaw)
-        self.velocity = data.get("velocity", self.velocity)  # Получаем скорость
-        
-        # Переинициализация списка с обновленными данными
-        self.init_trajectory_setpoint_list()
-        
-    def get_trajectory_setpoint(self) -> TrajectorySetpoint:
+    @classmethod
+    def from_dict(cls, data: dict):
         """
-        Возвращает текущий `TrajectorySetpoint` на основе текущего шага `current_step`.
+        Десериализует команду из словаря.
         """
-        if self.current_step < len(self.trajectory_setpoint_list):
-            return self.trajectory_setpoint_list[self.current_step]
-        else:
-            self.complete = True
-            self.current_step = 0
-            return None
-    
-    def init_trajectory_setpoint_list(self):
-        """
-        Инициализация списка точек траектории с объектами TrajectorySetpoint.
-        """
-        trajectory = TrajectorySetpoint()
-        trajectory.position[0] = self.x
-        trajectory.position[1] = self.y
-        trajectory.position[2] = self.z
-        trajectory.yaw = self.yaw
+        return cls(
+            counter=data["counter"],
+            x=data.get("x", float('nan')),
+            y=data.get("y", float('nan')),
+            z=data.get("z", float('nan')),
+            yaw=data.get("yaw", float('nan')),
+            velocity=data.get("velocity", float('nan'))
+        )
 
-        trajectory.velocity[0] = self.velocity if not np.isnan(self.velocity) else float('nan')
-        self.trajectory_setpoint_list = [trajectory]
+    def __repr__(self):
+        """
+        Строковое представление команды.
+        """
+        return (f"G20_MoveToPoint(counter={self.counter}, x={self.x}, y={self.y}, "
+                f"z={self.z}, yaw={self.yaw}, velocity={self.velocity}, complete={self.complete})")
+
 
 
 class G21_LinearMove(BaseGCommand):
     """
     Команда для линейного перемещения между двумя точками.
-
-    Аргументы конструктора:
-        counter (int): Порядковый номер команды.
-        x1, y1, z1 (float): Начальные координаты.
-        x2, y2, z2 (float): Конечные координаты.
-        velocity (list[float] | None): Список скоростей для каждого сегмента (по умолчанию `None`).
-        yaw (list[float] | None): Список углов ориентации (yaw) для каждого сегмента (по умолчанию `None`).
-        num_segments (int): Количество сегментов, на которые разбивается траектория (по умолчанию 2).
-        default_velocity (float): Скорость по умолчанию, если не указаны скорости (по умолчанию `float('nan')`).
-        default_yaw (float): Угол yaw по умолчанию, если не указаны yaw (по умолчанию `float('nan')`).
-        current_step (int): Текущий шаг выполнения команды (по умолчанию 0).
-
-    Переменные:
-        trajectory_setpoint_list (list[TrajectorySetpoint]): Список точек траектории.
-        velocity (list[float]): Список скоростей, соответствующих сегментам.
-        yaw (list[float]): Список углов yaw, соответствующих сегментам.
-
-    Подход:
-        1. Линейная траектория между начальной и конечной точками разбивается на равные сегменты 
-            (количество задаётся параметром `num_segments`).
-        2. Для каждого сегмента вычисляются координаты промежуточной точки на основе линейной интерполяции.
-        3. Скорости (`velocity`) и углы yaw (`yaw`) могут задаваться отдельно для каждого сегмента.
-            Если их не хватает для покрытия всех сегментов, используются значения по умолчанию (`default_velocity` и `default_yaw`).
-        4. Все точки траектории сохраняются в `trajectory_setpoint_list`.
     """
     def __init__(self, 
                  counter, 

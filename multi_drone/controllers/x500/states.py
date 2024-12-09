@@ -1,18 +1,20 @@
 from abc import ABC, abstractmethod
 
-from px4_msgs.msg import (
-    VehicleStatus, 
-)
+from px4_msgs.msg import VehicleStatus
 
-from multi_drone.controllers.x500.x500_base import X500BaseController, X500Params
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from multi_drone.controllers.x500.x500_base import X500BaseController
 
 class DroneState(ABC):
     """
     Базовый класс для всех состояний дрона.
     """
-    def __init__(self, controller: X500BaseController):        
+    def __init__(self, controller: "X500BaseController"):
         self.controller = controller
         self.params = controller.params
+        self.counter = 0
+
 
     @abstractmethod
     def enter(self):
@@ -57,13 +59,14 @@ class ArmingState(DroneState):
     """
     def enter(self):
         self.controller.log_info("Переход в состояние ARMING.")
-        self.controller.arm()
 
     def handle(self):
         if not self.params.flightCheck:
             self.controller.set_state("IDLE")
-        elif self.params.arm_state ==  VehicleStatus.ARMING_STATE_ARMED:
+        elif self.params.arm_state ==  VehicleStatus.ARMING_STATE_ARMED and self.counter > 10:
             self.controller.set_state("TAKEOFF")
+        self.controller.arm()
+        self.counter += 1
 
     def exit(self):
         self.controller.log_info("Выход из состояния ARMING.")
@@ -74,14 +77,15 @@ class TakeoffState(DroneState):
     Состояние взлета.
     """
     def enter(self):
-        self.controller.log_info("Переход в состояние TAKEOFF.")
-        self.controller.takeoff() 
+        self.controller.log_info("Переход в состояние TAKEOFF.") 
+        self.controller.takeoff()
 
     def handle(self):
         if not self.params.flightCheck:
             self.controller.set_state("IDLE")
         elif self.params.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_TAKEOFF:
             self.controller.set_state("LOITER")
+        self.controller.arm()
 
     def exit(self):
         self.controller.log_info("Выход из состояния TAKEOFF.")
@@ -103,6 +107,7 @@ class LoiterState(DroneState):
                 self.controller.set_state("OFFBOARD")
             elif self.params.landing:
                 self.controller.set_state("LANDING")
+        self.controller.arm()
 
     def exit(self):
         self.controller.log_info("Выход из состояния LOITER.")
