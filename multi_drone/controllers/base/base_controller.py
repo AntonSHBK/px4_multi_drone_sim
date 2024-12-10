@@ -24,6 +24,8 @@ from multi_drone.controllers.base.base_data import (
     VelocityData,
 )
 
+from multi_drone_msg.msg import LocalAndGlobalCoordinatesMsg
+
 class DroneLocalityState():
     # NED - СК дрона
     # ENU - СК мира
@@ -111,6 +113,26 @@ class DroneLocalityState():
         self.yaw_ENU = float(np.arctan2(2.0 * (array_q[3] * array_q[2] + array_q[0] * array_q[1]), 
                                   1.0 - 2.0 * (array_q[1] * array_q[1] + array_q[2] * array_q[2])))        
         self.yaw_NED = -self.yaw_ENU
+        
+    def to_msg(self) -> LocalAndGlobalCoordinatesMsg:
+        msg = LocalAndGlobalCoordinatesMsg()
+        msg.local_enu.position = self.position_local_ENU.to_vector3()
+        msg.local_enu.velocity = self.velocity_local_ENU.to_vector3()
+        msg.local_enu.yaw = self.yaw_ENU
+        
+        msg.local_ned.position = self.position_local_NED.to_vector3()
+        msg.local_ned.velocity = self.velocity_local_NED.to_vector3()
+        msg.local_ned.yaw = self.yaw_NED
+        
+        msg.global_enu.position = self.position_global_ENU.to_vector3()
+        msg.global_enu.velocity = self.velocity_global_ENU.to_vector3()
+        msg.global_enu.yaw = self.yaw_ENU
+        
+        msg.global_ned.position = self.position_global_NED.to_vector3()
+        msg.global_ned.velocity = self.velocity_global_NED.to_vector3()
+        msg.global_ned.yaw = self.yaw_NED
+        
+        return msg              
 
 
 class BaseDroneController(Node):
@@ -159,11 +181,7 @@ class BaseDroneController(Node):
              
         # self.delta_position = Vector3(x=0.0, y=0.0, z=0.0)
         # self.delta_orientation = Vector3(x=0.0, y=0.0, z=0.0)  
-        
-        self._init_subscribers()
-        self._init_publisher()    
-        
-    def _init_subscribers(self):            
+                   
         self.subscriber_vehicle_attitude = self.create_subscription(
             VehicleAttitude,
             f'{self.prefix_px}/fmu/out/vehicle_attitude',
@@ -171,7 +189,7 @@ class BaseDroneController(Node):
             self.qos_profile_unreliable
         )
         
-        self.local_position_sub = self.create_subscription(
+        self.subscriber_local_position = self.create_subscription(
             VehicleLocalPosition,
             f'{self.prefix_px}/fmu/out/vehicle_local_position',
             self.callback_local_position,
@@ -184,9 +202,7 @@ class BaseDroneController(Node):
         #     self.callback_local_position,
         #     self.qos_profile_unreliable
         # )        
-        
-    def _init_publisher(self):
-        
+                
         self.publisher_vehicle_command = self.create_publisher(
             VehicleCommand,
             f'{self.prefix_px}/fmu/in/vehicle_command',

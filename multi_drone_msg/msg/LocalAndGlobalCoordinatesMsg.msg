@@ -1,0 +1,5 @@
+# LocalAndGlobalCoordinates.msg
+CoordinateDataMsg local_enu
+CoordinateDataMsg local_ned
+CoordinateDataMsg global_enu
+CoordinateDataMsg global_ned

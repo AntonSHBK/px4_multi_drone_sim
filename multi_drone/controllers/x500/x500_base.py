@@ -15,7 +15,6 @@ from px4_msgs.msg import (
 )
 
 from multi_drone.controllers.base.base_controller import BaseDroneController
-
 from multi_drone.controllers.x500.states import (
     IdleState,
     ArmingState,
@@ -24,13 +23,10 @@ from multi_drone.controllers.x500.states import (
     LandingState,
     DisarmState,
     OffboardState,
-    DroneState
-)
-
-# from multi_drone_msg.msg import RobotState
+    DroneState)
+from multi_drone_msg.msg import DroneInformMsg, DroneParamsMsg
 
 
-@dataclass
 class X500Params:
     nav_state: int = VehicleStatus.NAVIGATION_STATE_MAX
     arm_state: int = VehicleStatus.ARMING_STATE_ARMED
@@ -39,15 +35,26 @@ class X500Params:
     landing: bool = False    
     arm_message: bool = True
     
-    flightCheck: bool = False
+    flight_check: bool = False
     failsafe: bool = False
     
     def update_params(self, msg: VehicleStatus):
         self.nav_state = msg.nav_state
         self.arm_state = msg.arming_state
         self.failsafe = msg.failsafe
-        self.flightCheck = msg.pre_flight_checks_pass
-
+        self.flight_check = msg.pre_flight_checks_pass
+        
+    def to_msg(self) -> DroneParamsMsg:
+        msg = DroneParamsMsg()
+        msg.arm_message = self.arm_message
+        msg.arm_state = self.arm_state
+        msg.nav_state = self.nav_state
+        msg.offboard_mode = self.offboard_mode
+        msg.landing = self.landing
+        msg.failsafe = self.failsafe
+        msg.flight_check = self.flight_check
+        return msg
+    
 
 class X500BaseController(BaseDroneController):
         
@@ -57,20 +64,13 @@ class X500BaseController(BaseDroneController):
         drone_type: str,
         default_position=[0.0,0.0,0.0],
         default_orientation=[0.0,0.0,0.0],
-        timer_state_period = 0.5):
-        
-        self.timer_state_period = timer_state_period
-                            
+        timer_state_period=0.5,
+        timer_inform_of_drone=0.5):
+                                    
         super().__init__(drone_id, drone_type, default_position, default_orientation)       
         
         self.log_info(f"Инициализация дрона с ID {self.drone_id}, тип {self.drone_type}, позиция {self.default_world_position_ENU}")
-
-        self._init_params()
-        self._init_subscribers()
-        self._init_publisher() 
-        self._init_timers()          
         
-    def _init_params(self):
         self.params = X500Params()
         
         self.states = {
@@ -86,11 +86,12 @@ class X500BaseController(BaseDroneController):
         
         self.offboard_commander = OffboardCommander(self)
         
-    def _init_timers(self):
         self.timer_state = self.create_timer(
-            self.timer_state_period, self.update_state)
+            timer_state_period, self.update_state)
         
-    def _init_subscribers(self):       
+        self.timer_inform_of_drone = self.create_timer(
+            timer_inform_of_drone, self.publish_inform_of_drone)
+        
         self.subscriber_vehicle_status = self.create_subscription(
             VehicleStatus,
             f'{self.prefix_px}/fmu/out/vehicle_status',
@@ -98,12 +99,11 @@ class X500BaseController(BaseDroneController):
             self.qos_profile_unreliable
         )
         
-    # def _init_publisher(self):       
-    #     self.publisher_state_of_robot = self.create_publisher(
-    #         RobotState,
-    #         f'{self.prefix_name}/out/state_of_robot',
-    #         self.qos_profile_unreliable
-    #     )        
+        self.publisher_inform_of_drone = self.create_publisher(
+            DroneInformMsg,
+            f'{self.prefix_name}/out/inform_of_drone',
+            self.qos_profile_unreliable
+        )        
     
     def vehicle_status_callback(self, msg: VehicleStatus):
         self.params.update_params(msg)
@@ -117,6 +117,13 @@ class X500BaseController(BaseDroneController):
 
     def update_state(self):
         self.current_state.handle()
+        
+    def publish_inform_of_drone(self):
+        msg = DroneInformMsg()
+        msg.params = self.params.to_msg()
+        msg.current_position = self.current_position.to_msg()
+        msg.target_position = self.target_position.to_msg()
+        self.publisher_inform_of_drone.publish(msg)
 
     def takeoff(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param1=1.0, param7=5.0)

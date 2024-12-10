@@ -15,7 +15,6 @@ class DroneState(ABC):
         self.params = controller.params
         self.counter = 0
 
-
     @abstractmethod
     def enter(self):
         """
@@ -46,7 +45,7 @@ class IdleState(DroneState):
         self.controller.log_info("Переход в состояние IDLE.")
 
     def handle(self):
-        if self.params.flightCheck and self.params.arm_message:
+        if self.params.flight_check and self.params.arm_message:
             self.controller.set_state("ARMING")
 
     def exit(self):
@@ -61,7 +60,7 @@ class ArmingState(DroneState):
         self.controller.log_info("Переход в состояние ARMING.")
 
     def handle(self):
-        if not self.params.flightCheck:
+        if not self.params.flight_check:
             self.controller.set_state("IDLE")
         elif self.params.arm_state ==  VehicleStatus.ARMING_STATE_ARMED and self.counter > 10:
             self.controller.set_state("TAKEOFF")
@@ -81,7 +80,7 @@ class TakeoffState(DroneState):
         self.controller.takeoff()
 
     def handle(self):
-        if not self.params.flightCheck:
+        if not self.params.flight_check:
             self.controller.set_state("IDLE")
         elif self.params.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_TAKEOFF:
             self.controller.set_state("LOITER")
@@ -100,7 +99,7 @@ class LoiterState(DroneState):
         # Возможно, публикация команды на удержание позиции
 
     def handle(self):
-        if not self.params.flightCheck:
+        if not self.params.flight_check:
             self.controller.set_state("IDLE")
         elif self.params.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_LOITER:
             if self.params.offboard_mode:
@@ -121,7 +120,7 @@ class OffboardState(DroneState):
         self.controller.enable_offboard_mode()
 
     def handle(self):
-        if not self.params.flightCheck or self.params.failsafe:
+        if not self.params.flight_check or self.params.failsafe:
             self.controller.set_state("IDLE")
         
         elif not self.params.offboard_mode:

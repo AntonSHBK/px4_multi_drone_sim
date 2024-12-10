@@ -2,13 +2,15 @@
 
 This project is designed to simulate and control multiple drones in a PX4-based simulation environment. The system allows for the integration of various drone types, trajectory planning using G-codes, and interaction via ROS2 for advanced multi-agent robotics systems.
 
+![Main GIF](path/to/your/main-gif.gif)
+*Описание основной GIF*
 ---
 
 ## Table of Contents
 - [PX4 Multi-Drone Simulation Project](#px4-multi-drone-simulation-project)
+  - [*Описание основной GIF*](#описание-основной-gif)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
-  - [Directory Structure](#directory-structure)
   - [Features](#features)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
@@ -28,51 +30,6 @@ This project provides a modular and extensible framework for simulating drones i
 - **G-code implementation** for defining drone trajectories and actions.
 - **Dockerized environment** for consistent setup and deployment.
 - **Multi-drone message protocols** for inter-drone communication and state management.
-
----
-
-## Directory Structure
-
-```plaintext
-.
-├── docker
-│   ├── docker-compose.yml   # Docker-compose configuration for the environment.
-│   └── Dockerfile           # Dockerfile for building the simulation container.
-├── docs
-│   ├── article              # Articles and guides related to the project.
-│   ├── description          # Detailed description of the system and components.
-│   ├── main.md              # Main documentation entry.
-│   └── media                # Media assets for documentation.
-├── fast_commands.md          # Quick reference for available commands.
-├── LICENSE                   # License file.
-├── multi_drone
-│   ├── CMakeLists.txt        # Build configuration for ROS2 package.
-│   ├── config                # Configuration files for drones and simulation.
-│   │   └── test_params.yaml  # Example parameter file for tests.
-│   ├── controllers           # Controllers for managing drone logic.
-│   │   ├── base_controller.py # Base class for all drone controllers.
-│   │   ├── base_data.py      # Data classes for managing drone states.
-│   │   ├── r1_rover          # Implementation for R1 Rover controllers.
-│   │   ├── rover_ackermann   # Implementation for Ackermann-style rovers.
-│   │   └── x500              # X500 drone-specific controller implementations.
-│   ├── g_code                # Implementation of G-code commands for drones.
-│   │   ├── base_command.py   # Base class for G-code commands.
-│   │   └── __init__.py       # Initialization for G-code commands.
-│   ├── launch                # ROS2 launch files for running simulations.
-│   │   └── test.launch.py    # Example launch file.
-│   ├── package.xml           # ROS2 package metadata.
-│   ├── scripts               # Auxiliary scripts for running servers and simulations.
-│   ├── tests                 # Test cases and validation.
-│   └── utils                 # Utility modules (geometry, transformations, etc.).
-├── multi_drone_msg           # ROS2 message definitions.
-│   ├── CMakeLists.txt        # Build configuration for the message package.
-│   ├── msg                   # Message definitions.
-│   │   └── RobotState.msg    # Example state message.
-│   └── package.xml           # ROS2 package metadata for messages.
-├── other                     # Other related modules and packages.
-│   └── multi_dron_interface  # Example interface for multi-drone systems.
-├── README.md                 # This readme file.
-```
 
 ---
 
