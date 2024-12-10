@@ -29,6 +29,7 @@ class G20_MoveToPoint(BaseGCommand):
         """
         if not self.complete:
             target_position = [self.x, self.y, self.z]
+            
             controller.move_to_point(
                 position=target_position,
                 yaw=self.yaw,

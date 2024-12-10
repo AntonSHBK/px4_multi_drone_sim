@@ -15,6 +15,7 @@ from px4_msgs.msg import (
 )
 
 from multi_drone.controllers.base.base_controller import BaseDroneController
+from multi_drone.controllers.base.position_transformer import DroneLocalityState
 from multi_drone.controllers.x500.states import (
     IdleState,
     ArmingState,
@@ -174,6 +175,11 @@ class OffboardCommander:
             TrajectorySetpoint,
             f'{controller.prefix_px}/fmu/in/trajectory_setpoint',
             controller.qos_profile_reliable
+        )
+        
+        self.target_position = DroneLocalityState(
+            world_position=self.controller.default_world_position_ENU,
+            world_orientation=self.controller.default_world_orientation_ENU
         )
         
         self.position = np.array([np.nan, np.nan, np.nan])

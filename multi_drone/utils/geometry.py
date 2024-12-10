@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+from typing import Union, Literal
 
 import numpy as np
-from scipy.spatial.transform import Rotation
+from scipy.spatial.transform import Rotation as R
 
 from geometry_msgs.msg import Vector3
 
@@ -31,9 +32,7 @@ def rotated_ENU_NED_quaternion(q: np.ndarray) -> np.ndarray:
     q = np.array([q[1], q[0], -q[2], q[3]])
     return q
 
-from typing import Union, Literal
-import numpy as np
-from scipy.spatial.transform import Rotation as R
+
 
 def transform_coordinates(
     source_position: np.ndarray,
