@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from dataclasses import dataclass
+from typing import Literal
 
 import numpy as np
 
@@ -12,7 +12,7 @@ from px4_msgs.msg import (
     VehicleStatus, 
     VehicleCommand,
     OffboardControlMode,
-)
+) 
 
 from multi_drone.controllers.base.base_controller import BaseDroneController
 from multi_drone.controllers.base.position_transformer import DroneLocalityState
@@ -32,8 +32,8 @@ class X500Params:
     nav_state: int = VehicleStatus.NAVIGATION_STATE_MAX
     arm_state: int = VehicleStatus.ARMING_STATE_ARMED
     
-    offboard_mode: bool = True
-    landing: bool = False    
+    offboard_mode: bool = False
+    landing: bool = False 
     arm_message: bool = True
     
     flight_check: bool = False
@@ -139,7 +139,7 @@ class X500BaseController(BaseDroneController):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=1.0)
     
     def disarm(self):
-        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=0)
+        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=0.0)
         
     def take_off(self):        
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param1=1.0, param7=5.0)
@@ -148,6 +148,9 @@ class X500BaseController(BaseDroneController):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
         
     def stop(self):
+        pass
+    
+    def stop_on_offboard(self):
         pass
         
     def set_home_to_current_position(self):
@@ -158,13 +161,14 @@ class OffboardCommander:
     """
     Класс для управления командами в режиме Offboard.
     """
-    def __init__(self, controller: X500BaseController, timer_offboard=0.01):
+    def __init__(self, controller: X500BaseController, timer_offboard=0.1):
         """
         Инициализация командера.
 
         :param controller: Ссылка на базовый контроллер дрона.
         """
-        self.controller = controller
+        self._controller = controller
+        self._active = False
         
         self.publisher_offboard_mode = controller.create_publisher(
             OffboardControlMode,
@@ -177,24 +181,31 @@ class OffboardCommander:
             controller.qos_profile_reliable
         )
         
-        self.target_position = DroneLocalityState(
-            world_position=self.controller.default_world_position_ENU,
-            world_orientation=self.controller.default_world_orientation_ENU
-        )
+        self._position = np.array([-7.0, 2.0, -20.0])
+        # self._position = np.array([np.nan, np.nan, np.nan])
+        self._velocity = np.array([np.nan, np.nan, np.nan])
+        self._acceleration = np.array([np.nan, np.nan, np.nan])
+        self._yaw = np.nan
+        self._yaw_speed = np.nan
         
-        self.position = np.array([np.nan, np.nan, np.nan])
-        self.velocity = np.array([np.nan, np.nan, np.nan])
-        self.acceleration = np.array([np.nan, np.nan, np.nan])
-        self.yaw = np.nan
-        self.yaw_speed = np.nan
-        
-        self.mode = 'position'
+        self.mode: Literal['position', 'velocity', 'mixed'] = 'mixed'
 
-        self.command_timer = self.controller.create_timer(
+        self.command_timer = self._controller.create_timer(
             timer_offboard, self._timer_offboard_callback
         )
         
-    def update(self, position=None, velocity=None, acceleration=None, yaw=None, yaw_speed=None):
+    def update(
+        self, 
+        position:np.ndarray=None, 
+        velocity:np.ndarray=None, 
+        acceleration:np.ndarray=None, 
+        yaw:float=None, 
+        yaw_speed:float=None,
+        mode: Literal['position', 'velocity', 'mixed'] = None,
+        system: Literal[
+            "local_NED", "local_ENU", 'global_ENU', 'global_NED'
+        ] = 'global_NED'
+    ):
         """
         Обновляет параметры состояния объекта. Если параметр не указан, он будет установлен в np.nan.
         
@@ -204,11 +215,34 @@ class OffboardCommander:
         :param yaw: float, ориентация в радианах.
         :param yaw_speed: float, скорость изменения yaw в радианах/сек.
         """
-        self.position = np.array(position, dtype=float) if position is not None else np.array([np.nan, np.nan, np.nan])
-        self.velocity = np.array(velocity, dtype=float) if velocity is not None else np.array([np.nan, np.nan, np.nan])
-        self.acceleration = np.array(acceleration, dtype=float) if acceleration is not None else np.array([np.nan, np.nan, np.nan])
-        self.yaw = float(yaw) if yaw is not None else np.nan
-        self.yaw_speed = float(yaw_speed) if yaw_speed is not None else np.nan
+        
+        if position:
+            self._controller.target_position.update_position(position, system=system)
+            self._position = self._controller.target_position.get_position(system=system)
+        else:
+            self._position = np.array([np.nan, np.nan, np.nan])
+            
+        if velocity:
+            self._controller.target_position.update_velocity(velocity, system=system)
+            self._velocity = self._controller.target_position.get_velocity(system=system)
+        else:
+            self._velocity = np.array([np.nan, np.nan, np.nan])
+            
+        if acceleration:
+            pass
+        
+        if yaw:
+            self._yaw = yaw
+        else:
+            self._yaw = np.nan
+        
+        if yaw_speed:
+            self._yaw_speed = yaw_speed
+        else:
+            self._yaw_speed = np.nan
+        
+        if mode:
+            self.mode = mode
 
     def send_offboard_mode(self, position=False, velocity=False, acceleration=False):
         """
@@ -221,65 +255,57 @@ class OffboardCommander:
         offboard_msg.acceleration = acceleration
         self.publisher_offboard_mode.publish(offboard_msg)
 
-    def send_trajectory_setpoint(self, position=None, velocity=None, acceleration=None, yaw=None, yawspeed=None):
+    def activate(self):
+        self._active = True
+        
+    def desactivate(self):
+        self._active = False
+    
+    def send_trajectory_setpoint(self):
         """
         Отправляет траекторную точку в режиме Offboard.
-
-        :param position: Массив NumPy [x, y, z] для позиции.
-        :param velocity: Массив NumPy [vx, vy, vz] для скорости.
-        :param acceleration: Массив NumPy [ax, ay, az] для ускорения.
-        :param yaw: Угол yaw в радианах.
-        :param yaw_speed: Скорость изменения yaw.
         """
         trajectory_msg = TrajectorySetpoint()
-    
         trajectory_msg.timestamp = int(Clock().now().nanoseconds / 1000)
 
-        # Устанавливаем значения
-        if position is not None:
-            trajectory_msg.position[:3] = position
-        if velocity is not None:
-            trajectory_msg.velocity[:3] = velocity
-        if acceleration is not None:
-            trajectory_msg.acceleration[:3] = acceleration
-        if yaw is not None:
-            trajectory_msg.yaw = yaw
-        if yawspeed is not None:
-            trajectory_msg.yawspeed = yawspeed
+        # TODO: возможно стоить убрать проверку на nan
+        
+        trajectory_msg.position[:3] = self._position
+        
+        if not np.isnan(self._velocity).all():
+            trajectory_msg.velocity[:3] = self._velocity
+        if not np.isnan(self._acceleration).all():
+            trajectory_msg.acceleration[:3] = self._acceleration
+        
+        trajectory_msg.yaw = self._yaw
+        
+        if not np.isnan(self._yaw_speed):
+            trajectory_msg.yawspeed = self._yaw_speed
 
         self.publisher_trajectory.publish(trajectory_msg)
-
-    def send_position_simple(self, x, y, z, yaw=None):
-        """
-        Упрощенный метод для отправки позиции.
-        """
-        self.send_offboard_mode(position=True)
-        self.send_trajectory_setpoint(position=np.array([x, y, z]), yaw=yaw)
-
-    def send_velocity_simple(self, vx, vy, vz, yaw_speed=None):
-        """
-        Упрощенный метод для отправки скорости.
-        """
-        self.send_offboard_mode(velocity=True)
-        self.send_trajectory_setpoint(velocity=np.array([vx, vy, vz]), yawspeed=yaw_speed)
     
     def _timer_offboard_callback(self):
         """
         Периодически отправляет команды в режиме Offboard.
         """
-        if not self.controller.params.offboard_mode:
+        if not self._active:
             return
-        if self.mode == "position":
+        
+        if self.mode == "mixed":
+            self.send_offboard_mode(position=True, velocity=True)
+            self.send_trajectory_setpoint()
+        elif self.mode == "position":
             self.send_offboard_mode(position=True)
-            self.send_trajectory_setpoint(position=self.position, yaw=self.yaw)
+            self.send_trajectory_setpoint()
         elif self.mode == "velocity":
             self.send_offboard_mode(velocity=True)
-            self.send_trajectory_setpoint(velocity=self.velocity, yawspeed=self.yaw_speed)
+            self.send_trajectory_setpoint()
+        
 
 
 def main(args=None):
     rclpy.init(args=args)    
-    control_node = X500BaseController(1, 'x500')
+    control_node = X500BaseController(1, 'x500', default_position=[0, 2, 0])
     rclpy.spin(control_node)
     control_node.destroy_node()
     rclpy.shutdown()

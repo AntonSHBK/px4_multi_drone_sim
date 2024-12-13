@@ -45,10 +45,10 @@ class BaseDroneController(Node):
             self.default_world_position_ENU,
             self.default_world_orientation_ENU
         )
-        # self.target_position = DroneLocalityState(
-        #     self.default_world_position_ENU,
-        #     self.default_world_orientation_ENU
-        # )
+        self.target_position = DroneLocalityState(
+            self.default_world_position_ENU,
+            self.default_world_orientation_ENU
+        )
                 
         self.drone_id = drone_id
         self.drone_type = drone_type

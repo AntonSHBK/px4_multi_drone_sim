@@ -13,7 +13,7 @@ from multi_drone.utils.geometry import (
 
 class BaseData:
     def _validate_and_convert(self, value):
-        if not isinstance(value, (float, int)):  # Добавлена поддержка int
+        if not isinstance(value, (float, int)):
             try:
                 value = float(value)
             except ValueError:

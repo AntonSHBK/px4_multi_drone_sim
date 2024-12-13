@@ -78,6 +78,7 @@ class TakeoffState(DroneState):
     def enter(self):
         self.controller.log_info("Переход в состояние TAKEOFF.") 
         self.controller.takeoff()
+        self.controller.set_home_to_current_position()
 
     def handle(self):
         if not self.params.flight_check:
@@ -88,7 +89,6 @@ class TakeoffState(DroneState):
 
     def exit(self):
         self.controller.log_info("Выход из состояния TAKEOFF.")
-
 
 class LoiterState(DroneState):
     """
@@ -117,7 +117,8 @@ class OffboardState(DroneState):
     """
     def enter(self):
         self.controller.log_info("Переход в состояние OFFBOARD.")
-        self.controller.enable_offboard_mode()
+        self.controller.offboard_commander.activate()
+        self.controller.enable_offboard_mode()  
 
     def handle(self):
         if not self.params.flight_check or self.params.failsafe:
@@ -125,10 +126,16 @@ class OffboardState(DroneState):
         
         elif not self.params.offboard_mode:
             self.controller.set_state("LOITER")
+            
+        if self.counter < 10:
+            self.counter += 1
+            self.controller.enable_offboard_mode()        
 
     def exit(self):
         self.controller.log_info("Выход из состояния OFFBOARD.")
         self.controller.disable_offboard_mode()
+        self.controller.params.offboard_mode = False
+        self.controller.offboard_commander.desactivate()
 
 
 class LandingState(DroneState):
@@ -137,14 +144,15 @@ class LandingState(DroneState):
     """
     def enter(self):
         self.controller.log_info("Переход в состояние LANDING.")
-        self.controller.land()
 
     def handle(self):
         if self.params.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_LAND:
             self.controller.set_state("DISARM")
+        self.controller.land()
 
     def exit(self):
         self.controller.log_info("Выход из состояния LANDING.")
+        self.params.landing = False
 
 
 class DisarmState(DroneState):
@@ -154,6 +162,7 @@ class DisarmState(DroneState):
     def enter(self):
         self.controller.log_info("Переход в состояние DISARM.")
         self.controller.disarm()
+        self.controller.params.arm_message = False
 
     def handle(self):
         if self.controller.params.arm_state == VehicleStatus.ARMING_STATE_STANDBY:
