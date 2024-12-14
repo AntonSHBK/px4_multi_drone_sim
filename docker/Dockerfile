@@ -22,7 +22,6 @@ RUN apt-get update && apt-get install -y \
 RUN locale-gen en_US en_US.UTF-8 && \
     update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 
-
 # Устанавливаем язык и добавляем репозитории
 RUN apt-get update && \
     add-apt-repository universe && \
@@ -65,7 +64,7 @@ RUN ldconfig /usr/local/lib/
 
 # **************************************************************************** #
 
-ENV PROJECT_NAME ROS-Multiagent-Robotics-System
+ENV PROJECT_NAME px4_multi_drone_sim
 
 # set work directory
 ENV WORKSPACE /workspace/src
@@ -73,7 +72,7 @@ RUN mkdir -p $WORKSPACE/$PROJECT_NAME
 WORKDIR $WORKSPACE
 
 # copy project
-COPY . $WORKSPACE/ROS-Multiagent-Robotics-System
+COPY . $WORKSPACE/px4_multi_drone_sim
 
 # **************************************************************************** #
 
@@ -133,57 +132,7 @@ RUN pip install --upgrade pip && \
 
 # **************************************************************************** #
 
-# Создание нового пользователя
-RUN useradd -ms /bin/bash rosuser && \
-    echo 'rosuser:1111' | chpasswd && \
-    usermod -aG sudo rosuser
-
-# **************************************************************************** #
-
-# Install QGroundControl
-
-WORKDIR /opt
-
-RUN apt-get update && apt-get install -y \
-    gstreamer1.0-plugins-bad \
-    gstreamer1.0-libav \
-    gstreamer1.0-gl \
-    libfuse2 \
-    libxcb-xinerama0 \
-    libxkbcommon-x11-0 \
-    libxcb-cursor-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Удаляем ModemManager, так как он может конфликтовать с MAVLink
-RUN apt-get remove -y modemmanager
-
-# Добавляем пользователя в группу dialout для доступа к последовательным устройствам
-RUN usermod -a -G dialout rosuser
-
-RUN wget https://d176tv9ibo4jno.cloudfront.net/latest/QGroundControl.AppImage -O /opt/QGroundControl.AppImage \
-    && chmod +x /opt/QGroundControl.AppImage  
-
-# **************************************************************************** #
-
-WORKDIR $WORKSPACE
-
-# Устонавливаем вспомоагтельные репозитории для разработки
-RUN git clone https://github.com/gazebosim/ros_gz_project_template.git && \
-    git clone https://github.com/PX4/PX4-gazebo-models.git
-
-# **************************************************************************** #
-
-# Переключаемся на пользователя rosuser
-# USER rosuser
-
 WORKDIR /workspace
-
-# Настраиваем .bashrc для пользователя rosuser
-RUN echo "source /opt/ros/humble/setup.bash" >> /home/rosuser/.bashrc
-RUN echo "alias sros='source /workspace/install/setup.bash'" >> /home/rosuser/.bashrc
-RUN echo "alias agent='MicroXRCEAgent udp4 -p8888'" >> /home/rosuser/.bashrc
-RUN echo "export PATH=\$PATH:/workspace/src/PX4-Autopilot/build/px4_sitl_default/bin" >> /home/rosuser/.bashrc
-
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "alias sros='source /workspace/install/setup.bash'" >> ~/.bashrc
 RUN echo "alias agent='MicroXRCEAgent udp4 -p8888'" >> ~/.bashrc

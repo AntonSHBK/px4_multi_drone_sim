@@ -15,7 +15,6 @@ from px4_msgs.msg import (
 ) 
 
 from multi_drone.controllers.base.base_controller import BaseDroneController
-from multi_drone.controllers.base.position_transformer import DroneLocalityState
 from multi_drone.controllers.x500.states import (
     IdleState,
     ArmingState,
@@ -34,7 +33,7 @@ class X500Params:
     
     offboard_mode: bool = False
     landing: bool = False 
-    arm_message: bool = False
+    arm_message: bool = True
     
     flight_check: bool = False
     failsafe: bool = False

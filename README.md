@@ -1,28 +1,14 @@
 # PX4 Multi-Drone Simulation Project
 
-This project is designed to simulate and control multiple drones in a PX4-based simulation environment. The system allows for the integration of various drone types, trajectory planning using G-codes, and interaction via ROS2 for advanced multi-agent robotics systems.
+This project is designed to simulate and control multiple drones in a PX4-based simulation environment. The system allows for the integration of various drone types, trajectory planning using G-codes, and interaction via ROS 2 for advanced multi-agent robotics systems.
 
-![Main GIF](path/to/your/main-gif.gif)
-*Описание основной GIF*
+<img src="docs/media/logo.webp" alt="Project Logo" width="600"/>  
 ---
 
-## Table of Contents
-- [PX4 Multi-Drone Simulation Project](#px4-multi-drone-simulation-project)
-  - [*Описание основной GIF*](#описание-основной-gif)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Features](#features)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Building the Environment](#building-the-environment)
-  - [Usage](#usage)
-    - [Fast Commands](#fast-commands)
-    - [Launch Files](#launch-files)
-  - [G-Code System](#g-code-system)
-  - [Contributing](#contributing)
-  - [License](#license)
+<img src="docs/media/thre_drones_gz.jpg" alt="Three Drones in Gazebo" width="600"/>  
 
----
+<img src="docs/media/thre_drones_up_gz.jpg" alt="Three Drones from Above" width="600"/>  
+
 
 ## Overview
 This project provides a modular and extensible framework for simulating drones in a PX4-based environment. Key components include:
@@ -30,6 +16,10 @@ This project provides a modular and extensible framework for simulating drones i
 - **G-code implementation** for defining drone trajectories and actions.
 - **Dockerized environment** for consistent setup and deployment.
 - **Multi-drone message protocols** for inter-drone communication and state management.
+- 
+## Project Status
+**This project is currently under active development.**  
+New features, improvements, and bug fixes are being added regularly. Contributions and feedback are welcome to help refine and expand the system further.
 
 ---
 
@@ -53,10 +43,49 @@ This project provides a modular and extensible framework for simulating drones i
 
 ## Getting Started
 
-### Prerequisites
-- Docker and Docker Compose
-- ROS2 Humble or later
-- PX4 Autopilot (compatible version)
+### Dependencies
+
+#### **Required:**
+1. **ROS 2 Humble** (on Ubuntu 22.04)  
+   Install via [official guide](https://docs.ros.org/en/humble/Installation.html).
+
+2. **PX4 v1.14**  
+   Clone and checkout:
+   ```bash
+   git clone https://github.com/PX4/PX4-Autopilot.git
+   cd ./PX4-Autopilot
+   git checkout v1.14.4
+   git submodule sync --recursive
+   git submodule update --init --recursive
+   ```
+
+3. **px4_msgs v1.14**  
+   ```bash
+    git clone https://github.com/PX4/px4_msgs.git
+    cd px4_msgs
+    git checkout release/1.14
+   ```
+
+4. **Docker**  
+   Install via [Docker guide](https://docs.docker.com/get-docker/).
+
+5. **Python Libraries**  
+   ```bash
+   pip install scipy numpy
+   ```
+
+---
+
+### **Optional:**
+1. **Terminal Emulator:**  
+   `gnome-terminal`, `xterm`, or `konsole` for PX4 SITL.  
+
+2. **X Server for Docker Visualization:**  
+   Use XLaunch (Windows), XQuartz (macOS), or `xhost` on Linux for GUI support in Docker.  
+   Enable X11 forwarding:  
+   ```bash
+   xhost +local:docker
+   ```
 
 ### Building the Environment
 1. Clone the repository:
@@ -70,7 +99,9 @@ This project provides a modular and extensible framework for simulating drones i
    ```
 3. Launch the simulation:
    ```bash
-   ros2 launch multi_drone test.launch.py
+   colcon build --packages-select px4_msgs
+   colcon build --packages-select multi_drone multi_drone_msg
+   ros2 launch multi_drone test_run.launch.py
    ```
 
 ---
@@ -80,22 +111,6 @@ This project provides a modular and extensible framework for simulating drones i
 ### Fast Commands
 Refer to `fast_commands.md` for a list of quick commands and their descriptions.
 
-### Launch Files
-- Use `test.launch.py` to start a sample simulation.
-- Modify configuration files in `multi_drone/config` for custom setups.
-
----
-
-## G-Code System
-
-The G-code system allows you to define drone actions and trajectories using a command-like syntax. Examples:
-- **G0**: Stop
-- **G20**: Move to a specific point
-- **G21**: Linear motion between points
-- **G22**: Circular interpolation
-
-G-code commands are implemented in `multi_drone/g_code`.
-
 ---
 
 ## Contributing
@@ -103,5 +118,10 @@ We welcome contributions! Feel free to open issues or submit pull requests.
 
 ---
 
-## License
-<!-- This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details. -->
+## Contacts
+
+For questions or support, please contact:
+
+- **Name**: Pisarenko Anton
+- **Email**: anton42@yandex.ru
+- **Telegram**: [antonSHBK](https://t.me/antonSHBK)
