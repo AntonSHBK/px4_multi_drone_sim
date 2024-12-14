@@ -2,6 +2,8 @@
 
 This project is designed to simulate and control multiple drones in a PX4-based simulation environment. The system allows for the integration of various drone types, trajectory planning using G-codes, and interaction via ROS 2 for advanced multi-agent robotics systems.
 
+This work is part of my dissertation research. In the future, detailed textual descriptions of the proposed approaches and algorithms will be added, along with additional features and extended capabilities to enhance the system's functionality.
+
 <img src="docs/media/logo.webp" alt="Project Logo" width="600"/>  
 ---
 
