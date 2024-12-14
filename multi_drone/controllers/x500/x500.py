@@ -10,19 +10,24 @@ class X500Controller(X500BaseController):
         
     def __init__(
         self,
-        drone_id: int,
-        drone_type: str,
+        drone_id:int=1,
+        drone_type:str='x500',
         default_position=[0.0,0.0,0.0],
         default_orientation=[0.0,0.0,0.0]):                                    
         super().__init__(drone_id, drone_type, default_position, default_orientation) 
-        self.gcode_commander = X500Commander(self, timer_execution=0.1)
-
-def main(args=None):
-    rclpy.init(args=args)    
-    control_node = X500Controller(1, 'x500')
-    rclpy.spin(control_node)
-    control_node.destroy_node()
-    rclpy.shutdown()
+        self.g_code_commander = X500Commander(self, timer_execution=0.1)
+    
+def main():    
+    rclpy.init()     
+    control_node = X500Controller()
+    
+    try:
+        rclpy.spin(control_node)
+    except KeyboardInterrupt:
+        control_node.get_logger().info("Остановка контроллера.")
+    finally:
+        control_node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

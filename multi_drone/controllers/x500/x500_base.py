@@ -34,7 +34,7 @@ class X500Params:
     
     offboard_mode: bool = False
     landing: bool = False 
-    arm_message: bool = True
+    arm_message: bool = False
     
     flight_check: bool = False
     failsafe: bool = False
@@ -61,8 +61,8 @@ class X500BaseController(BaseDroneController):
         
     def __init__(
         self,
-        drone_id: int,
-        drone_type: str,
+        drone_id:int=1,
+        drone_type:str='x500',
         default_position=[0.0,0.0,0.0],
         default_orientation=[0.0,0.0,0.0],
         timer_state_period=0.5,
@@ -299,16 +299,20 @@ class OffboardCommander:
             self.send_trajectory_setpoint()
         elif self.mode == "velocity":
             self.send_offboard_mode(velocity=True)
-            self.send_trajectory_setpoint()
-        
+            self.send_trajectory_setpoint()        
 
 
-def main(args=None):
-    rclpy.init(args=args)    
-    control_node = X500BaseController(1, 'x500', default_position=[0, 2, 0])
-    rclpy.spin(control_node)
-    control_node.destroy_node()
-    rclpy.shutdown()
+def main():    
+    rclpy.init()     
+    control_node = X500BaseController()
+    
+    try:
+        rclpy.spin(control_node)
+    except KeyboardInterrupt:
+        control_node.get_logger().info("Остановка контроллера.")
+    finally:
+        control_node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

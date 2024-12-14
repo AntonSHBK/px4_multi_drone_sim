@@ -4,12 +4,6 @@ import yaml
 import os
 import logging
 
-import numpy as np
-from scipy.spatial.transform import Rotation
-
-from geometry_msgs.msg import Vector3
-
-
 def load_yaml_params(file_path):
     """Загружаем параметры из YAML файла с логированием ошибок"""
     if not os.path.isfile(file_path):

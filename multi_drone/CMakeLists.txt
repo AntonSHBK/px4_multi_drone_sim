@@ -19,14 +19,13 @@ install(
   DESTINATION share/${PROJECT_NAME}/config
 )
 
-# install(
-#   PROGRAMS
-#     scripts/controllers/x500/x500_controller.py
-#     scripts/test/control_test.py
-#     # scripts/controllers/r1_rover_controller.py
-#     # scripts/controllers/rover_ackermann_controller.py
-#   DESTINATION lib/${PROJECT_NAME}
-# )
+install(
+  PROGRAMS
+    controllers/base/base_controller.py
+    controllers/x500/x500_base.py
+    controllers/x500/x500.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 install(
   DIRECTORY controllers/

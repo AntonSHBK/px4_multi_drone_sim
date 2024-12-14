@@ -25,11 +25,26 @@ from multi_drone.controllers.base.position_transformer import DroneLocalityState
 class BaseDroneController(Node):
     def __init__(
         self,
-        drone_id: int,
-        drone_type: str,
-        default_position=[0.0,0.0,0.0],  # Позиция задаётся списком [x, y, z] метры
-        default_orientation=[0.0,0.0,0.0],  # Ориентация задаётся списком [roll, pitch, yaw] радианы
+        drone_type: str = 'x500',
+        drone_id: int = 1,        
+        default_position: list = [0.0,0.0,0.0],  # Позиция задаётся списком [x, y, z] метры
+        default_orientation: list = [0.0,0.0,0.0],  # Ориентация задаётся списком [roll, pitch, yaw] радианы
     ):        
+        super().__init__(f'drone_controller')
+        from rcl_interfaces.msg import ParameterDescriptor
+        self.drone_type = drone_type
+        self.drone_id = drone_id
+        
+        self.declare_parameter('drone_id', value=drone_id, descriptor=ParameterDescriptor(dynamic_typing=True))
+        self.declare_parameter('drone_type', value=drone_type, descriptor=ParameterDescriptor(dynamic_typing=True))
+        self.declare_parameter('default_position', value=default_position, descriptor=ParameterDescriptor(dynamic_typing=True))
+        self.declare_parameter('default_orientation', value=default_orientation, descriptor=ParameterDescriptor(dynamic_typing=True))
+
+        self.drone_id: int = self.get_parameter('drone_id').value
+        self.drone_type: str = self.get_parameter('drone_type').value        
+        default_position: list = self.get_parameter('default_position').value
+        default_orientation: list = self.get_parameter('default_orientation').value
+        
         self.default_world_position_ENU = PositionData(
             x=default_position[0],
             y=default_position[1],
@@ -49,15 +64,10 @@ class BaseDroneController(Node):
             self.default_world_position_ENU,
             self.default_world_orientation_ENU
         )
-                
-        self.drone_id = drone_id
-        self.drone_type = drone_type
         
         # Префиксы для топиков
         self.prefix_px = f"px4_{self.drone_id}"
         self.prefix_name = f"id_{self.drone_id}_{self.drone_type}"
-        
-        super().__init__(f'{self.prefix_name}_controller')
         
         self.qos_profile_unreliable = self.get_qos_profile(
             reliable=False, depth=5
@@ -205,12 +215,17 @@ class BaseDroneController(Node):
         self.get_logger().info(message)
         
       
-def main(args=None):
-    rclpy.init(args=args)    
-    control_node = BaseDroneController(1, 'x500')
-    rclpy.spin(control_node)
-    control_node.destroy_node()
-    rclpy.shutdown()
+def main():  
+    rclpy.init()     
+    control_node = BaseDroneController()
+    
+    try:
+        rclpy.spin(control_node)
+    except KeyboardInterrupt:
+        control_node.get_logger().info("Остановка контроллера.")
+    finally:
+        control_node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
