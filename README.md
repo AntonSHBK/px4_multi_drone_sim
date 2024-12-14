@@ -45,6 +45,23 @@ New features, improvements, and bug fixes are being added regularly. Contributio
 
 ## Getting Started
 
+### Fast run
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/AntonSHBK/px4_multi_drone_sim.git
+   cd px4_multi_drone_sim
+   ```
+2. Build the Docker container:
+   ```bash
+   docker-compose up --build
+   ```
+3. Launch the simulation (in container /workplace/src):
+   ```bash
+   colcon build --packages-select px4_msgs
+   colcon build --packages-select multi_drone multi_drone_msg
+   ros2 launch multi_drone test_run.launch.py
+   ```
+
 ### Dependencies
 
 #### **Required:**
@@ -88,24 +105,6 @@ New features, improvements, and bug fixes are being added regularly. Contributio
    ```bash
    xhost +local:docker
    ```
-
-### Building the Environment
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/AntonSHBK/px4_multi_drone_sim.git
-   cd px4_multi_drone_sim
-   ```
-2. Build the Docker container:
-   ```bash
-   docker-compose up --build
-   ```
-3. Launch the simulation:
-   ```bash
-   colcon build --packages-select px4_msgs
-   colcon build --packages-select multi_drone multi_drone_msg
-   ros2 launch multi_drone test_run.launch.py
-   ```
-
 ---
 
 ## Usage
