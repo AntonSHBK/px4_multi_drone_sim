@@ -31,7 +31,7 @@ class X500Params:
     nav_state: int = VehicleStatus.NAVIGATION_STATE_MAX
     arm_state: int = VehicleStatus.ARMING_STATE_ARMED
     
-    offboard_mode: bool = False
+    offboard_mode: bool = True
     landing: bool = False 
     arm_message: bool = True
     
@@ -67,7 +67,12 @@ class X500BaseController(BaseDroneController):
         timer_state_period=0.5,
         timer_inform_of_drone=0.5):
                                     
-        super().__init__(drone_id, drone_type, default_position, default_orientation)       
+        super().__init__(
+            drone_id=drone_id, 
+            drone_type=drone_type, 
+            default_position=default_position,
+            default_orientation=default_orientation
+        )       
         
         self.log_info(f"Инициализация дрона с ID {self.drone_id}, тип {self.drone_type}, позиция {self.default_world_position_ENU}")
         
@@ -180,8 +185,7 @@ class OffboardCommander:
             controller.qos_profile_reliable
         )
         
-        self._position = np.array([-7.0, 2.0, -20.0])
-        # self._position = np.array([np.nan, np.nan, np.nan])
+        self._position = np.array([np.nan, np.nan, np.nan])
         self._velocity = np.array([np.nan, np.nan, np.nan])
         self._acceleration = np.array([np.nan, np.nan, np.nan])
         self._yaw = np.nan
@@ -203,7 +207,7 @@ class OffboardCommander:
         mode: Literal['position', 'velocity', 'mixed'] = None,
         system: Literal[
             "local_NED", "local_ENU", 'global_ENU', 'global_NED'
-        ] = 'global_NED'
+        ] = 'global_ENU'
     ):
         """
         Обновляет параметры состояния объекта. Если параметр не указан, он будет установлен в np.nan.
@@ -231,12 +235,12 @@ class OffboardCommander:
             pass
         
         if yaw:
-            self._yaw = yaw
+            self._yaw = float(yaw)
         else:
             self._yaw = np.nan
         
         if yaw_speed:
-            self._yaw_speed = yaw_speed
+            self._yaw_speed = float(yaw_speed)
         else:
             self._yaw_speed = np.nan
         

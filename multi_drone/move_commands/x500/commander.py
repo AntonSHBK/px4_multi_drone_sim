@@ -1,31 +1,27 @@
 import json
+import inspect
 
 from std_msgs.msg import String
 
-from multi_drone.move_commands.base.base_commander import BaseCommander
+from multi_drone.move_commands.base.base_commander import DroneCommander
 from multi_drone.move_commands.base.base_g_code import BaseGCommand
-from multi_drone.move_commands.x500.g_code import (
-    G20_MoveToPoint
-)
-
+import multi_drone.move_commands.x500.g_code as g_code_module
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from multi_drone.controllers.x500.x500 import X500Controller
 
-class X500Commander(BaseCommander):
+class X500Commander(DroneCommander):
     """
     Коммандер для дрона X500.
     """
 
     def __init__(self, controller:  "X500Controller", timer_execution=0.1):
-        super().__init__(controller)
+        super().__init__(controller)        
 
         self.command_classes = {
-            # "G0": G0_Stop,
-            # "G1": G1_MoveToPoint,
-            # "G2": G2_CircularMove,
-            "G20": G20_MoveToPoint,
+            cls.__name__: cls for _, cls in inspect.getmembers(g_code_module, inspect.isclass)
+            if issubclass(cls, BaseGCommand) and cls != BaseGCommand
         }
 
         self.subscriber_command_json = controller.create_subscription(
@@ -41,10 +37,15 @@ class X500Commander(BaseCommander):
         """
         ROS-таймер для выполнения команд.
         """
+        
         if self.active_command:
-            self.active_command.execute(self.controller)
-            if self.active_command.is_complete(self.controller):
-                self.handle_completion(self.active_command)
+            # self.active_command.execute(self.controller)
+            try:
+                if self.active_command.is_complete(self.controller):
+                    self.handle_completion(self.active_command)
+                    self.active_command = None
+            except Exception as e:
+                self.controller.log_error(f"Ошибка при проверке завершения команды: {e}")
                 self.active_command = None
 
         elif self.command_queue:
@@ -66,7 +67,11 @@ class X500Commander(BaseCommander):
         """
         Обработка входящей команды.
         """
-        command_name = data.get("name",)
+        command_name = data.get("name")
+        if not command_name:
+            self.controller.log_error("Отсутствует имя команды в данных.")
+            return
+        
         command_class: BaseGCommand = self.command_classes.get(command_name)
 
         if not command_class:
@@ -77,7 +82,7 @@ class X500Commander(BaseCommander):
         self.command_history.append(data)
         self.add_command(command)
 
-    def handle_completion(self, command):
+    def handle_completion(self, command: BaseGCommand):
         """
         Вызывается при завершении команды.
         """

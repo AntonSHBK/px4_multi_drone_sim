@@ -138,3 +138,24 @@ def calculate_yaw_towards_target(current_position: Vector3, target_position: Vec
         delta_y = target_position.y - current_position.y        
         yaw_ENU = np.arctan2(delta_y, delta_x)        
         return float(yaw_ENU)
+    
+
+def calculate_distance(array1: Union[np.ndarray, list], array2: Union[np.ndarray, list]) -> float:
+    """
+    Вычисляет евклидово расстояние между двумя массивами произвольной размерности.
+
+    :param array1: Первый массив или список координат.
+    :param array2: Второй массив или список координат.
+    :return: Евклидово расстояние между двумя массивами.
+    :raises ValueError: Если входные массивы имеют разную размерность.
+    """
+    # Преобразование входных данных в numpy массивы
+    array1 = np.array(array1)
+    array2 = np.array(array2)
+
+    # Проверка размерности массивов
+    if array1.shape != array2.shape:
+        raise ValueError("Входные массивы должны иметь одинаковую размерность.")
+
+    # Вычисление расстояния
+    return np.linalg.norm(array1 - array2)

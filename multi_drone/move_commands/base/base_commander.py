@@ -5,7 +5,7 @@ from multi_drone.controllers.base.base_controller import BaseDroneController
 from multi_drone.move_commands.base.base_g_code import BaseGCommand
 
 
-class BaseCommander(ABC):
+class DroneCommander(ABC):
     """
     Базовый класс для командеров, управляющих командами дрона.
     """
@@ -24,7 +24,7 @@ class BaseCommander(ABC):
         """
         pass
 
-    def add_command(self, command):
+    def add_command(self, command: BaseGCommand):
         """
         Добавляет команду в очередь.
         :param command: Объект команды.

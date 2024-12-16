@@ -14,7 +14,12 @@ class X500Controller(X500BaseController):
         drone_type:str='x500',
         default_position=[0.0,0.0,0.0],
         default_orientation=[0.0,0.0,0.0]):                                    
-        super().__init__(drone_id, drone_type, default_position, default_orientation) 
+        super().__init__(
+            drone_id=drone_id, 
+            drone_type=drone_type, 
+            default_position=default_position,
+            default_orientation=default_orientation
+        )        
         self.g_code_commander = X500Commander(self, timer_execution=0.1)
     
 def main():    
