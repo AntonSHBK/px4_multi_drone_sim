@@ -31,7 +31,7 @@ class DroneCommander(ABC):
         """
         with self.lock:
             self.command_queue.append(command)
-            self.controller.log_info(f"Команда {command.name} добавлена в очередь.")
+            # self.controller.log_info(f"Команда {command.name} добавлена в очередь.")
 
     # def execute_commands(self):
     #     """

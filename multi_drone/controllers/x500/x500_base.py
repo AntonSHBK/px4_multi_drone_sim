@@ -28,15 +28,18 @@ from multi_drone_msg.msg import DroneInformMsg, DroneParamsMsg
 
 
 class X500Params:
-    nav_state: int = VehicleStatus.NAVIGATION_STATE_MAX
-    arm_state: int = VehicleStatus.ARMING_STATE_ARMED
-    
-    offboard_mode: bool = True
-    landing: bool = False 
-    arm_message: bool = True
-    
-    flight_check: bool = False
-    failsafe: bool = False
+    def __init__(self):
+        self.nav_state: int = VehicleStatus.NAVIGATION_STATE_MAX
+        self.arm_state: int = VehicleStatus.ARMING_STATE_ARMED
+
+        self.offboard_mode: bool = False
+        self.takeoff: bool = False
+        self.landing: bool = False
+        self.arming: bool = False
+
+        self.flight_check: bool = False
+        self.failsafe: bool = False
+
     
     def update_params(self, msg: VehicleStatus):
         self.nav_state = msg.nav_state
@@ -46,7 +49,7 @@ class X500Params:
         
     def to_msg(self) -> DroneParamsMsg:
         msg = DroneParamsMsg()
-        msg.arm_message = self.arm_message
+        msg.arm_message = self.arming
         msg.arm_state = self.arm_state
         msg.nav_state = self.nav_state
         msg.offboard_mode = self.offboard_mode
@@ -55,6 +58,15 @@ class X500Params:
         msg.flight_check = self.flight_check
         return msg
     
+    def reset(self):
+        self.__init__()
+        
+    def __repr__(self):
+        return (f"X500Params(nav_state={self.nav_state}, arm_state={self.arm_state}, "
+                f"offboard_mode={self.offboard_mode}, landing={self.landing}, "
+                f"arm_message={self.arming}, flight_check={self.flight_check}, "
+                f"failsafe={self.failsafe})")
+
 
 class X500BaseController(BaseDroneController):
         
@@ -155,7 +167,7 @@ class X500BaseController(BaseDroneController):
         pass
     
     def stop_on_offboard(self):
-        pass
+        self.offboard_commander.update()
         
     def set_home_to_current_position(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_HOME, param1=1.0)
@@ -220,14 +232,16 @@ class OffboardCommander:
         """
         
         if position:
+            position = np.array(position)
             self._controller.target_position.update_position(position, system=system)
-            self._position = self._controller.target_position.get_position(system=system)
+            self._position = self._controller.target_position.get_position(system='local_NED')
         else:
             self._position = np.array([np.nan, np.nan, np.nan])
             
         if velocity:
+            velocity = np.array(velocity)
             self._controller.target_position.update_velocity(velocity, system=system)
-            self._velocity = self._controller.target_position.get_velocity(system=system)
+            self._velocity = self._controller.target_position.get_velocity(system='local_NED')
         else:
             self._velocity = np.array([np.nan, np.nan, np.nan])
             

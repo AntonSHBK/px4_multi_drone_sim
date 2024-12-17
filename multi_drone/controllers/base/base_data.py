@@ -253,7 +253,7 @@ class PositionData(BaseData):
             rotation_type=rotation_type)
     
     def to_local(self, reference_position, reference_orientation, rotation_type='quaternion'):
-        return transform_orientation(
+        return transform_coordinates(
             source_position=self.to_array(),
             reference_position=reference_position,
             reference_orientation=reference_orientation,
@@ -368,7 +368,7 @@ class VelocityData(BaseData):
             rotation_type=rotation_type)
     
     def to_local(self, reference_orientation, rotation_type='quaternion'):
-        return transform_orientation(
+        return transform_coordinates(
             source_position=self.to_array(),
             reference_position=np.asarray([0,0,0]),
             reference_orientation=reference_orientation,

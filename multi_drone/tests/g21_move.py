@@ -1,9 +1,11 @@
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import String
 import json
 
-from multi_drone.move_commands.x500.g_code import G20_MoveToPoint
+import rclpy
+from rclpy.node import Node
+
+from std_msgs.msg import String
+
+from multi_drone.move_commands.x500.g_code.g_code import G20_MoveToPoint
 
 class TestMoveToPointNode(Node):
     """
@@ -12,7 +14,6 @@ class TestMoveToPointNode(Node):
     def __init__(self):
         super().__init__('test_move_to_point_node')
 
-        # Параметры
         self.target_point = G20_MoveToPoint(
             x=0,
             y=0,
@@ -22,8 +23,8 @@ class TestMoveToPointNode(Node):
         
         self.command_publisher = self.create_publisher(
             String,
-            '/px4_1/command_json',  # Топик для команд
-            10  # QoS
+            '/px4_1/command_json',
+            10 
         )
         try:
             command_msg = String()

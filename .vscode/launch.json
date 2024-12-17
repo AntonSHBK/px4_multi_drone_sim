@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ROS 2: Отладка одного файла",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "justMyCode": false,
+            "preLaunchTask": "source_ros_env",
+            "console": "integratedTerminal"
+            
+        }
+    ]
+}

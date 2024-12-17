@@ -43,9 +43,10 @@ class IdleState(DroneState):
     """
     def enter(self):
         self.controller.log_info("Переход в состояние IDLE.")
+        self.controller.params.reset()
 
     def handle(self):
-        if self.params.flight_check and self.params.arm_message:
+        if self.params.flight_check and self.params.arming:
             self.controller.set_state("ARMING")
 
     def exit(self):
@@ -62,7 +63,10 @@ class ArmingState(DroneState):
     def handle(self):
         if not self.params.flight_check:
             self.controller.set_state("IDLE")
-        elif self.params.arm_state ==  VehicleStatus.ARMING_STATE_ARMED and self.counter > 10:
+        elif not self.params.arming:
+            self.controller.set_state("DISARM")
+        elif self.params.arm_state ==  VehicleStatus.ARMING_STATE_ARMED \
+            and self.counter > 10 and self.params.takeoff:
             self.controller.set_state("TAKEOFF")
         self.controller.arm()
         self.counter += 1
@@ -78,6 +82,7 @@ class TakeoffState(DroneState):
     def enter(self):
         self.controller.log_info("Переход в состояние TAKEOFF.") 
         self.controller.takeoff()
+        # TODO: Нужно проверить где лучше делать установку домашней позиции
         self.controller.set_home_to_current_position()
 
     def handle(self):
@@ -96,7 +101,6 @@ class LoiterState(DroneState):
     """
     def enter(self):
         self.controller.log_info("Переход в состояние LOITER.")
-        # Возможно, публикация команды на удержание позиции
 
     def handle(self):
         if not self.params.flight_check:
@@ -134,7 +138,6 @@ class OffboardState(DroneState):
     def exit(self):
         self.controller.log_info("Выход из состояния OFFBOARD.")
         self.controller.disable_offboard_mode()
-        self.controller.params.offboard_mode = False
         self.controller.offboard_commander.desactivate()
 
 
@@ -146,13 +149,12 @@ class LandingState(DroneState):
         self.controller.log_info("Переход в состояние LANDING.")
 
     def handle(self):
-        if self.params.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_LAND:
+        if self.params.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_LAND and not self.params.arming:
             self.controller.set_state("DISARM")
         self.controller.land()
 
     def exit(self):
         self.controller.log_info("Выход из состояния LANDING.")
-        self.params.landing = False
 
 
 class DisarmState(DroneState):
@@ -162,7 +164,6 @@ class DisarmState(DroneState):
     def enter(self):
         self.controller.log_info("Переход в состояние DISARM.")
         self.controller.disarm()
-        self.controller.params.arm_message = False
 
     def handle(self):
         if self.controller.params.arm_state == VehicleStatus.ARMING_STATE_STANDBY:

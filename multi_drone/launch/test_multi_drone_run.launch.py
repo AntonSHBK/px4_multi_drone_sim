@@ -36,6 +36,7 @@ def generate_launch_description():
                 drone_id=robot['drone_id'],
                 drone_type=robot['drone_type'],
                 spawn_position=robot['position'],
+                px4_autostart=robot['px4_autostart'],
                 px4_dir="/workspace/src/PX4-Autopilot/",
                 # terminal="gnome-terminal",
                 terminal='bash',

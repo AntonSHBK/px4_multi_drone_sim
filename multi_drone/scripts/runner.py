@@ -126,6 +126,7 @@ def launch_robot(
         drone_id: int=1, 
         drone_type: str='x500', 
         spawn_position: str=[0, 0, 0, 0, 0, 0],  
+        px4_autostart: int = 4001,
         px4_dir: str = "/workspace/src/PX4-Autopilot/",
         terminal: Literal[
             'gnome-terminal', 'xterm', 'konsole', 'bash'
@@ -141,7 +142,7 @@ def launch_robot(
         drone_id=drone_id,
         drone_type=drone_type,
         spawn_position=spawn_position,
-        px4_autostart=4001,
+        px4_autostart=px4_autostart,
         px4_dir=px4_dir,
         terminal=terminal
     )
@@ -158,7 +159,7 @@ def launch_robot(
 
     nodes = [
         px4_process.create_process(),
-        controller_node.create_node()
+        # controller_node.create_node()
     ]
 
     return nodes

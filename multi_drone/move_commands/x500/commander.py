@@ -5,7 +5,8 @@ from std_msgs.msg import String
 
 from multi_drone.move_commands.base.base_commander import DroneCommander
 from multi_drone.move_commands.base.base_g_code import BaseGCommand
-import multi_drone.move_commands.x500.g_code as g_code_module
+import multi_drone.move_commands.x500.g_code.g_code as g_code_module
+# from multi_drone.move_commands.x500.g_code import G20_MoveToPoint
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -20,7 +21,8 @@ class X500Commander(DroneCommander):
         super().__init__(controller)        
 
         self.command_classes = {
-            cls.__name__: cls for _, cls in inspect.getmembers(g_code_module, inspect.isclass)
+            cls("temp").name: cls
+            for _, cls in inspect.getmembers(g_code_module, inspect.isclass)
             if issubclass(cls, BaseGCommand) and cls != BaseGCommand
         }
 
@@ -51,7 +53,7 @@ class X500Commander(DroneCommander):
         elif self.command_queue:
             self.active_command = self.command_queue.pop(0)
             self.controller.log_info(f"Выполнение команды: {self.active_command.name}")
-            self.active_command.execute(self.controller)
+            self.active_command.safe_execute(self.controller)
 
     def command_json_callback(self, msg: String):
         """
