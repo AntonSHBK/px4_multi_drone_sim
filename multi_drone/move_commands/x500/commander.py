@@ -5,8 +5,7 @@ from std_msgs.msg import String
 
 from multi_drone.move_commands.base.base_commander import DroneCommander
 from multi_drone.move_commands.base.base_g_code import BaseGCommand
-import multi_drone.move_commands.x500.g_code.g_code as g_code_module
-# from multi_drone.move_commands.x500.g_code import G20_MoveToPoint
+import multi_drone.move_commands.x500.g_code as g_code_module
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -41,7 +40,6 @@ class X500Commander(DroneCommander):
         """
         
         if self.active_command:
-            # self.active_command.execute(self.controller)
             try:
                 if self.active_command.is_complete(self.controller):
                     self.handle_completion(self.active_command)

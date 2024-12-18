@@ -45,11 +45,12 @@ class BaseGCommand(ABC):
         :param controller: Экземпляр контроллера.
         """
         if self.complete:
-            controller.log_info(f"Команда {self.name} уже завершена.")
+            # controller.log_info(f"Команда {self.name} уже завершена.")
             return
 
         if not self.can_execute(controller):
-            controller.log_error(f"Команда {self.name} не может быть выполнена в текущем состоянии.")
+            # controller.log_error(f"Команда {self.name} не может быть выполнена в текущем состоянии.")
+            self.complete = True
             return
 
         self.execute(controller)

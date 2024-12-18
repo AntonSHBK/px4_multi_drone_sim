@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from time import sleep
 
 from px4_msgs.msg import VehicleStatus
 
@@ -101,6 +102,7 @@ class LoiterState(DroneState):
     """
     def enter(self):
         self.controller.log_info("Переход в состояние LOITER.")
+        self.controller.enable_loiter_mode()
 
     def handle(self):
         if not self.params.flight_check:
@@ -137,9 +139,8 @@ class OffboardState(DroneState):
 
     def exit(self):
         self.controller.log_info("Выход из состояния OFFBOARD.")
-        self.controller.disable_offboard_mode()
-        self.controller.offboard_commander.desactivate()
-
+        self.controller.offboard_commander.desactivate() 
+               
 
 class LandingState(DroneState):
     """
@@ -149,9 +150,11 @@ class LandingState(DroneState):
         self.controller.log_info("Переход в состояние LANDING.")
 
     def handle(self):
+        self.controller.arm()
+        self.controller.land()
         if self.params.nav_state == VehicleStatus.NAVIGATION_STATE_AUTO_LAND and not self.params.arming:
             self.controller.set_state("DISARM")
-        self.controller.land()
+        
 
     def exit(self):
         self.controller.log_info("Выход из состояния LANDING.")

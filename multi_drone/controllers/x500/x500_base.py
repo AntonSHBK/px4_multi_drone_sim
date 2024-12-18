@@ -33,9 +33,9 @@ class X500Params:
         self.arm_state: int = VehicleStatus.ARMING_STATE_ARMED
 
         self.offboard_mode: bool = False
-        self.takeoff: bool = False
+        self.takeoff: bool = True
         self.landing: bool = False
-        self.arming: bool = False
+        self.arming: bool = True
 
         self.flight_check: bool = False
         self.failsafe: bool = False
@@ -148,8 +148,8 @@ class X500BaseController(BaseDroneController):
     def enable_offboard_mode(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 1.0, 6.0)
                 
-    def disable_offboard_mode(self):
-        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 1.0, 0.0)
+    def enable_loiter_mode(self):
+        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 1.0, 5.0)
 
     def arm(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=1.0)
@@ -163,8 +163,9 @@ class X500BaseController(BaseDroneController):
     def land(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
         
-    def stop(self):
-        pass
+    # def stop(self):
+    #     VehicleCommand.PREFLIGHT_CALIBRATION_TEMPERATURE_CALIBRATION
+    #     pass
     
     def stop_on_offboard(self):
         self.offboard_commander.update()

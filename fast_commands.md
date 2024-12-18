@@ -69,3 +69,30 @@ ros2 topic pub /topic_name std_msgs/String "data: 'Hello, Drone!'"
 ```bash
 rqt
 ```
+
+## G command test
+
+```bash
+#!/bin/bash
+
+# Отправка команды G1 (Arm)
+ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G1\", \"counter\": 1}'}"
+
+# Отправка команды G2 (Disarm)
+ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G2\", \"counter\": 2}'}"
+
+# Отправка команды G3 (Takeoff на высоту 2.0 м)
+ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G3\", \"counter\": 3, \"altitude\": 2.0}'}"
+
+# Отправка команды G4 (Landing)
+ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G4\", \"counter\": 4}'}"
+
+# Отправка команды G5 (Loiter)
+ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G5\", \"counter\": 5}'}"
+
+# Отправка команды G6 (Offboard)
+ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G6\", \"counter\": 6}'}"
+
+echo "Команды G1-G6 успешно отправлены на топик /px4_1/command_json."
+
+```
