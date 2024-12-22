@@ -5,7 +5,6 @@ from std_msgs.msg import String
 
 from multi_drone.move_commands.base.base_commander import DroneCommander
 from multi_drone.move_commands.base.base_g_code import BaseGCommand
-from multi_drone.move_commands.x500.g_code.g10 import G10_Offboard_Stop
 import multi_drone.move_commands.x500.g_code as g_code_module
 
 from typing import TYPE_CHECKING
@@ -88,7 +87,7 @@ class X500Commander(DroneCommander):
         self.controller.log_info(f"Команда {command.name} завершена.")
 
     def check_special_command(self, command: BaseGCommand) -> bool:
-        if command.name == "G10":
+        if command.name == "G0":
             command.execute(self.controller)
             return True
         return False

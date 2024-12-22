@@ -48,11 +48,11 @@ class G23_Orbit(BaseMoveGCommand):
     def update_targets_positions(self):
         """
         Формирует список точек на орбите вокруг центра.
-        """
-        self.targets_positions.clear()
-
+        """        
         if self.center_point is None:
-            raise ValueError("Для выполнения орбиты необходимо указать центр орбиты (center_point).")
+            return
+        
+        self.targets_positions.clear()
 
         # Вычисление количества точек, исходя из угловой скорости и продолжительности
         if self.duration:

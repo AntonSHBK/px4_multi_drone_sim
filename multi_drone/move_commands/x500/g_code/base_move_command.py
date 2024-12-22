@@ -85,8 +85,8 @@ class BaseMoveGCommand(BaseGCommand):
             target_position = self.targets_positions[self.current_step]            
             target_position_point = target_position.position_to_array()
             
-            yaw_tolerance = 0.1  # Радианы
-            position_tolerance = 0.1  # Метры
+            yaw_tolerance = 0.5  # Радианы
+            position_tolerance = 0.5  # Метры
             
             target_position = np.array(
                 [v if v is not None else np.nan for v in target_position_point]

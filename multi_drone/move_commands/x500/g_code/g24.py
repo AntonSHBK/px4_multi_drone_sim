@@ -55,10 +55,10 @@ class G24_SpiralTrajectory(BaseMoveGCommand):
         """
         Формирует список точек на спирали вокруг центра.
         """
-        self.targets_positions.clear()
-
         if self.center_point is None:
-            raise ValueError("Для выполнения спирали необходимо указать центр (center_point).")
+            return
+        
+        self.targets_positions.clear()
 
         # Генерация углов для всех витков
         total_points = self.points_per_turn * self.turns

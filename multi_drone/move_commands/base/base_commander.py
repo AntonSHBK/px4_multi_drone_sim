@@ -35,13 +35,6 @@ class DroneCommander(ABC):
             self.command_queue.append(command)
 
     @abstractmethod
-    def execute(self, controller: 'BaseDroneController'):
-        """
-        Выполняет команды из очереди.
-        """
-        pass
-
-    @abstractmethod
     def handle_completion(self, command):
         """
         Метод вызывается при завершении команды.
