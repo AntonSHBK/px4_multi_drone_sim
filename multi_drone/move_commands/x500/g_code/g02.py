@@ -43,8 +43,8 @@ class G2_Disarm(BaseGCommand):
         """
         if isinstance(controller.current_state, IdleState):
             # controller.log_info("G2_Disarm: Дрон успешно разармирован (DisarmState).")
-            self.complete = True
-        return self.complete
+            self.complete_command()
+        return self._check_finish()
 
     def to_dict(self) -> dict:
         """

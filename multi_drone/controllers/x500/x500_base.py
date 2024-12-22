@@ -32,7 +32,7 @@ class X500Params:
         self.nav_state: int = VehicleStatus.NAVIGATION_STATE_MAX
         self.arm_state: int = VehicleStatus.ARMING_STATE_ARMED
 
-        self.offboard_mode: bool = False
+        self.offboard_mode: bool = True
         self.takeoff: bool = True
         self.landing: bool = False
         self.arming: bool = True
@@ -232,29 +232,29 @@ class OffboardCommander:
         :param yaw_speed: float, скорость изменения yaw в радианах/сек.
         """
         
-        if position:
+        if position is not None:
             position = np.array(position)
             self._controller.target_position.update_position(position, system=system)
             self._position = self._controller.target_position.get_position(system='local_NED')
         else:
             self._position = np.array([np.nan, np.nan, np.nan])
             
-        if velocity:
+        if velocity is not None:
             velocity = np.array(velocity)
             self._controller.target_position.update_velocity(velocity, system=system)
             self._velocity = self._controller.target_position.get_velocity(system='local_NED')
         else:
             self._velocity = np.array([np.nan, np.nan, np.nan])
             
-        if acceleration:
+        if acceleration is not None:
             pass
         
-        if yaw:
+        if yaw is not None:
             self._yaw = float(yaw)
         else:
             self._yaw = np.nan
         
-        if yaw_speed:
+        if yaw_speed is not None:
             self._yaw_speed = float(yaw_speed)
         else:
             self._yaw_speed = np.nan

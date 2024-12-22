@@ -21,7 +21,6 @@ class G1_Arm(BaseGCommand):
         if not isinstance(controller.current_state, IdleState):
             controller.log_error("G1_Arm: Невозможно выполнить команду. Дрон не в состоянии Idle.")
             return False
-
         return True
 
     def execute(self, controller: 'X500Controller'):
@@ -38,8 +37,8 @@ class G1_Arm(BaseGCommand):
         """
         if isinstance(controller.current_state, ArmingState):
             # controller.log_info("G1_Arm: Дрон успешно армирован и находится в состоянии ArmingState.")
-            self.complete = True
-        return self.complete
+            self.complete_command()
+        return self._check_finish()
 
     def to_dict(self) -> dict:
         """

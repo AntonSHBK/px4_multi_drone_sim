@@ -42,8 +42,8 @@ class G6_Offboard(BaseGCommand):
         """
         if isinstance(controller.current_state, OffboardState):
             # controller.log_info("G6_Offboard: Дрон успешно переключен в состояние OffboardState.")
-            self.complete = True
-        return self.complete
+            self.complete_command()
+        return self._check_finish()
 
     def to_dict(self) -> dict:
         """

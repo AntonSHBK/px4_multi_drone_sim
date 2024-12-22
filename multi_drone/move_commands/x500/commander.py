@@ -5,6 +5,7 @@ from std_msgs.msg import String
 
 from multi_drone.move_commands.base.base_commander import DroneCommander
 from multi_drone.move_commands.base.base_g_code import BaseGCommand
+from multi_drone.move_commands.x500.g_code.g10 import G10_Offboard_Stop
 import multi_drone.move_commands.x500.g_code as g_code_module
 
 from typing import TYPE_CHECKING
@@ -33,7 +34,7 @@ class X500Commander(DroneCommander):
         )
         
         self.timer_execution_commands = controller.create_timer(timer_execution, self._timer_execute_commands_callback)
-
+        
     def _timer_execute_commands_callback(self):
         """
         ROS-таймер для выполнения команд.
@@ -72,18 +73,22 @@ class X500Commander(DroneCommander):
             self.controller.log_error("Отсутствует имя команды в данных.")
             return
         
-        command_class: BaseGCommand = self.command_classes.get(command_name)
-
-        if not command_class:
-            self.controller.log_error(f"Неизвестная команда: {command_name}")
-            return
+        command_class: BaseGCommand = self.command_classes.get(command_name)       
 
         command = command_class.from_dict(data)
         self.command_history.append(data)
-        self.add_command(command)
+        
+        if not self.check_special_command(command):                 
+            self.add_command(command)
 
     def handle_completion(self, command: BaseGCommand):
         """
         Вызывается при завершении команды.
         """
         self.controller.log_info(f"Команда {command.name} завершена.")
+
+    def check_special_command(self, command: BaseGCommand) -> bool:
+        if command.name == "G10":
+            command.execute(self.controller)
+            return True
+        return False

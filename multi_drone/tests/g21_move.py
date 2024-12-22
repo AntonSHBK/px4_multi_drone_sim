@@ -5,7 +5,7 @@ from rclpy.node import Node
 
 from std_msgs.msg import String
 
-from multi_drone.move_commands.x500.g_code.g_code import G20_MoveToPoint
+from multi_drone.move_commands.x500.g_code import G20_MoveToPoint
 
 class TestMoveToPointNode(Node):
     """

@@ -24,7 +24,6 @@ class G5_Loiter(BaseGCommand):
         if not isinstance(controller.current_state, OffboardState):
             controller.log_error("G5_Loiter: Команду можно выполнить только из состояния OffboardState.")
             return False
-
         return True
 
     def execute(self, controller: 'X500Controller'):
@@ -41,8 +40,8 @@ class G5_Loiter(BaseGCommand):
         """
         if isinstance(controller.current_state, LoiterState):
             # controller.log_info("G5_Loiter: Дрон успешно перешёл в режим LoiterState.")
-            self.complete = True
-        return self.complete
+            self.complete_command()
+        return self._check_finish()
 
     def to_dict(self) -> dict:
         """

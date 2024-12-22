@@ -10,7 +10,7 @@ class G3_Takeoff(BaseGCommand):
     """
     Команда для автоматического взлёта дрона.
     """
-    def __init__(self, counter: int = 0, altitude: float = 2.0):
+    def __init__(self, counter: int = 0, altitude: float = 2.5):
         """
         :param counter: Счётчик команды.
         :param altitude: Целевая высота взлёта (в метрах).
@@ -43,8 +43,8 @@ class G3_Takeoff(BaseGCommand):
         """
         if isinstance(controller.current_state, LoiterState):
             # controller.log_info("G3_Takeoff: Дрон успешно перешёл в состояние LoiterState.")
-            self.complete = True
-        return self.complete
+            self.complete_command()
+        return self._check_finish()
 
     def to_dict(self) -> dict:
         """
@@ -59,7 +59,7 @@ class G3_Takeoff(BaseGCommand):
         """
         Десериализует команду из словаря.
         """
-        return cls(counter=data.get("counter", 0), altitude=data.get("altitude", 2.0))
+        return cls(counter=data.get("counter", 0), altitude=data.get("altitude", 2.5))
 
     def __repr__(self):
         """

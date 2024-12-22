@@ -44,8 +44,8 @@ class G4_Land(BaseGCommand):
         """
         if isinstance(controller.current_state, LandingState):
             # controller.log_info("G4_Land: Дрон находится в состоянии LandingState. Посадка началась.")
-            self.complete = True
-        return self.complete
+            self.complete_command()
+        return self._check_finish()
 
     def to_dict(self) -> dict:
         """

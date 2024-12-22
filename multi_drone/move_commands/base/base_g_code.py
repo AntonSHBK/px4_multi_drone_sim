@@ -7,11 +7,12 @@ if TYPE_CHECKING:
     from multi_drone.controllers.base.base_controller import BaseDroneController
 
 class BaseGCommand(ABC):
-    def __init__(self, name, counter):
+    def __init__(self, name, counter=0, current_step=0):
         self.name = name
         self.counter = counter
         self.complete = False
-        self.current_step = 0
+        self.interrupt = False
+        self.current_step = current_step
 
     @abstractmethod
     def execute(self, controller):
@@ -44,16 +45,32 @@ class BaseGCommand(ABC):
         Проверяет возможность выполнения команды и завершённость перед вызовом execute.
         :param controller: Экземпляр контроллера.
         """
-        if self.complete:
+        if self._check_finish():
             # controller.log_info(f"Команда {self.name} уже завершена.")
             return
-
         if not self.can_execute(controller):
             # controller.log_error(f"Команда {self.name} не может быть выполнена в текущем состоянии.")
-            self.complete = True
+            self.mark_as_interrupted()
             return
-
         self.execute(controller)
+        
+    def _check_finish(self):
+        if self.complete or self.interrupt:
+            return True
+        else:
+            return False
+    
+    def mark_as_interrupted(self):
+        """
+        Устанавливает флаг, что команда должна быть прервана.
+        """
+        self.interrupt = True
+        
+    def complete_command(self):
+        """
+        Устанавливает флаг, что команда завершена.
+        """
+        self.complete = True
 
     def to_dict(self) -> dict:
         """
@@ -63,7 +80,7 @@ class BaseGCommand(ABC):
         return {
             "name": self.name,
             "counter": self.counter,
-            "complete": self.complete
+            "current_step": self.current_step
         }
 
     @classmethod
@@ -73,11 +90,14 @@ class BaseGCommand(ABC):
         :param data: Словарь с параметрами команды.
         :return: Экземпляр команды.
         """
-        return cls(name=data["name"], counter=data["counter"])
+        return cls(
+            name=data["name"], 
+            counter=data["counter"], 
+            current_step=data["current_step"]
+        )
 
     def __repr__(self):
         """
         Представление команды в строковом формате для отладки.
         """
         return f"{self.__class__.__name__}(name={self.name}, counter={self.counter}, complete={self.complete})"
-

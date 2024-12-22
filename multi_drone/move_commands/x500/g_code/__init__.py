@@ -6,6 +6,10 @@ from .g04 import G4_Land
 from .g05 import G5_Loiter
 from .g06 import G6_Offboard
 from .g20 import G20_MoveToPoint
+from .g21 import G21_LinearMove
+from .g22 import G22_CircularTrajectory
+from .g23 import G23_Orbit
+from .g24 import G24_SpiralTrajectory
 
 __all__ = [
     "G0_Stop",
@@ -16,4 +20,8 @@ __all__ = [
     "G5_Loiter",
     "G6_Offboard",
     "G20_MoveToPoint",
+    "G21_LinearMove",
+    "G22_CircularTrajectory",
+    "G23_Orbit",
+    "G24_SpiralTrajectory"
 ]
