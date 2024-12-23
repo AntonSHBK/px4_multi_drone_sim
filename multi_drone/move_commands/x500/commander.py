@@ -27,7 +27,7 @@ class X500Commander(DroneCommander):
 
         self.subscriber_command_json = controller.create_subscription(
             String,
-            f"{controller.prefix_px}/command_json",
+            f"{controller.prefix_name}/in/command_json",
             self.command_json_callback,
             controller.qos_profile_reliable
         )
