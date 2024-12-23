@@ -73,7 +73,7 @@ class ControllerNode:
     def __init__(
         self,
         package_name: str = 'multi_drone',
-        executables_script: str = 'x500.py',
+        controller_script: str = 'x500.py',
         drone_id: int = 1,
         drone_type: str = 'x500',
         spawn_position: list = [0, 0, 0, 0, 0, 0],
@@ -93,7 +93,7 @@ class ControllerNode:
         :param custom_executables: Кастомные исполняемые файлы для дронов.
         """
         self.package_name = package_name
-        self.executables_script = executables_script
+        self.executables_script = controller_script
         self.drone_id = drone_id
         self.drone_type = drone_type
         self.default_position = [float(x) for x in spawn_position[:3]]
@@ -121,6 +121,18 @@ class ControllerNode:
             parameters=parameters,
         )
 
+def get_microxrce_agent_exec(
+        udp: str = 'udp4',
+        port: str = '8888'
+    ) -> ExecuteProcess:
+    return ExecuteProcess(
+        cmd=[
+                'MicroXRCEAgent', f'{udp}', '-p', f'{port}'
+            ],
+        output='log',
+        name="microxrce_agent"
+    )
+
 
 def launch_robot(
         drone_id: int=1, 
@@ -132,7 +144,7 @@ def launch_robot(
             'gnome-terminal', 'xterm', 'konsole', 'bash'
         ]='gnome-terminal',
         package_name='multi_drone',
-        executables_script='x500.py',
+        controller_script='x500.py',
         additional_params={}
     ):
     """
@@ -149,7 +161,7 @@ def launch_robot(
 
     controller_node = ControllerNode(
         package_name=package_name,
-        executables_script=executables_script,
+        controller_script=controller_script,
         additional_params=additional_params,
         drone_id=drone_id,
         drone_type=drone_type,
@@ -159,7 +171,7 @@ def launch_robot(
 
     nodes = [
         px4_process.create_process(),
-        # controller_node.create_node()
+        controller_node.create_node()
     ]
 
     return nodes

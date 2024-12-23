@@ -10,10 +10,10 @@ class X500Controller(X500BaseController):
         
     def __init__(
         self,
-        drone_id:int=1,
-        drone_type:str='x500',
-        default_position=[0.0,0.0,0.0],
-        default_orientation=[0.0,0.0,0.0]):                                    
+        drone_id: int = 1,
+        drone_type: str = 'x500',
+        default_position: list = [0.0,0.0,0.0],
+        default_orientation: list = [0.0,0.0,0.0]):                                    
         super().__init__(
             drone_id=drone_id, 
             drone_type=drone_type, 

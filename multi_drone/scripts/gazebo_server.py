@@ -4,6 +4,7 @@ from typing import List
 import subprocess
 import os
 import shutil
+
 from launch.actions import ExecuteProcess
 
 DEFAULT_DOWNLOAD_DIR = "https://github.com/PX4/PX4-gazebo-models/archive/refs/heads/main.zip"
@@ -95,7 +96,7 @@ def run_simulation_gazebo(
         os.system(f'rm {px4_model_store}/resources.zip')
         os.system(f'rm -rf {px4_model_store}/PX4-gazebo-models-main/')
 
-    print('> Запускаем симуляцию Gazebo...')
+    print(f'> Запускаем симуляцию Gazebo {world}')
     
     # Формируем путь для ресурсов Gazebo
     custom_model_paths = []

@@ -8,7 +8,7 @@ from launch.actions import ExecuteProcess
 from ament_index_python.packages import get_package_share_directory
 
 from multi_drone.utils.methods import load_yaml_params
-from multi_drone.scripts.runner import launch_robot
+from multi_drone.scripts.runner import launch_robot, get_microxrce_agent_exec
 
 
 def generate_launch_description():    
@@ -18,13 +18,7 @@ def generate_launch_description():
 
     launch_descriptions = []
 
-    microxrce_agent = ExecuteProcess(
-        cmd=[
-            'MicroXRCEAgent', 'udp4', '-p', '8888'
-        ],
-        output='log',
-        name="microxrce_agent"
-    )
+    microxrce_agent = get_microxrce_agent_exec(udp='udp4', port='8888')
     launch_descriptions.append(microxrce_agent)
 
     for robot in robots_config['robots']:
@@ -41,7 +35,7 @@ def generate_launch_description():
                 # terminal="gnome-terminal",
                 terminal='bash',
                 package_name="multi_drone",
-                executables_script=robot['executables_script'],
+                controller_script=robot['controller_script'],
                 additional_params={}
             )
         )

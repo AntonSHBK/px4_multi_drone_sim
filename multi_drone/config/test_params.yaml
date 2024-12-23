@@ -1,18 +1,18 @@
 robots:
   - drone_id: 1
     drone_type: x500
-    position: [0, 2, 0, 0, 0, 0]
+    position: [0,2,0,0,0,0]
     px4_autostart: 4001
-    executables_script: 'x500_base.py'
+    controller_script: 'x500.py'
 
   - drone_id: 2
     drone_type: x500
-    position: [0, 0, 0, 0, 0, 0]
+    position: [0,0,0,0,0,0]
     px4_autostart: 4001
-    executables_script: 'x500_base.py'
+    controller_script: 'x500.py'
 
   - drone_id: 3
     drone_type: x500
-    position: [0, -2, 0, 0, 0, 0]
+    position: [0,-2,0,0,0,0]
     px4_autostart: 4001
-    executables_script: 'x500_base.py'
+    controller_script: 'x500.py'
