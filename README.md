@@ -162,6 +162,20 @@ We welcome contributions! Feel free to open issues or submit pull requests.
 
 ---
 
+## Citation
+
+```
+@misc{px4_multi_drone_sim,
+  author       = {Anton Pisarenko},
+  title        = {PX4 Multi-Drone Simulation Project},
+  year         = {2024},
+  month        = {December},
+  howpublished = {\url{https://github.com/AntonSHBK/px4_multi_drone_sim}},
+  note         = {Accessed: 2024-12-24}
+}
+```
+
+
 ## Contacts
 
 For questions or support, please contact:
