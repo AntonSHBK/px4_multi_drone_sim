@@ -7,10 +7,9 @@ This work is part of my dissertation research. In the future, detailed textual d
 <img src="docs/media/logo.webp" alt="Project Logo" width="600"/>  
 ---
 
-<video width="600" controls>
-  <source src="docs/media/one_control.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+<img src="docs/media/one_control.gif" alt="PX4 Multi-Drone Control Demonstration" width="600">
+
+---
 
 <img src="docs/media/thre_drones_gz.jpg" alt="Three Drones in Gazebo" width="600"/>  
 
