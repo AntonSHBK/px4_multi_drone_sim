@@ -113,6 +113,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-realtime-tools \
     ros-humble-ros-gz \
     ros-humble-xacro \
+    ros-humble-ros-gz-bridge \
     && rm -rf /var/lib/apt/lists/*
 
 # **************************************************************************** #

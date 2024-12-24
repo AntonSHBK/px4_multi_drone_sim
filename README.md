@@ -11,21 +11,30 @@ This work is part of my dissertation research. In the future, detailed textual d
 
 <img src="docs/media/thre_drones_up_gz.jpg" alt="Three Drones from Above" width="600"/>  
 
+---
 
-## Overview
+## **Documentation**
+
+For more details on system architecture, components, and usage, refer to the [Main Documentation](documentation/main.md).
+
+---
+
+## **Overview**
 This project provides a modular and extensible framework for simulating drones in a PX4-based environment. Key components include:
 - **Drone controllers** for managing the logic and behavior of drones.
 - **G-code implementation** for defining drone trajectories and actions.
 - **Dockerized environment** for consistent setup and deployment.
 - **Multi-drone message protocols** for inter-drone communication and state management.
-- 
-## Project Status
+
+---
+
+## **Project Status**
 **This project is currently under active development.**  
 New features, improvements, and bug fixes are being added regularly. Contributions and feedback are welcome to help refine and expand the system further.
 
 ---
 
-## Features
+## **Features**
 
 - **G-Code System**: 
   - Supports commands like linear motion, circular interpolation, takeoff, landing, etc.
@@ -43,9 +52,9 @@ New features, improvements, and bug fixes are being added regularly. Contributio
 
 ---
 
-## Getting Started
+## **Getting Started**
 
-### Fast run
+### **Fast Run**
 1. Clone the repository:
    ```bash
    git clone https://github.com/AntonSHBK/px4_multi_drone_sim.git
@@ -55,12 +64,46 @@ New features, improvements, and bug fixes are being added regularly. Contributio
    ```bash
    docker-compose up --build
    ```
-3. Launch the simulation (in container /workplace/src):
+3. Launch the simulation (inside container workspace `/workplace/src`):
    ```bash
    colcon build --packages-select px4_msgs
    colcon build --packages-select multi_drone multi_drone_msg
    ros2 launch multi_drone test_run.launch.py
    ```
+
+---
+
+## **Example G Commands**
+
+### **1. G20: Move to Point**
+```bash
+ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{
+    \"name\": \"G20\",
+    \"counter\": 1,
+    \"x\": 10.0,
+    \"y\": 5.0,
+    \"z\": -10.0,
+    \"yaw\": 1.57,
+    \"velocity\": 2.0,
+    \"coordinate_system\": \"global_ENU\"
+}'}"
+```
+
+### **2. G21: Linear Move**
+```bash
+ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{
+    \"name\": \"G21\",
+    \"counter\": 2,
+    \"start_point\": [0.0, 0.0, 0.0],
+    \"end_point\": [5.0, 10.0, -10.0],
+    \"velocity\": 1.5,
+    \"yaw\": 1.57,
+    \"coordinate_system\": \"global_ENU\"
+}'}"
+```
+See the [documentation](documentation/main.md). documentation for other commands.
+
+Use these commands to control the drones and implement complex trajectories. Modify parameters as needed for your specific requirements.
 
 ### Dependencies
 

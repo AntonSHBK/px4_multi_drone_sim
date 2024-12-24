@@ -11,6 +11,7 @@ from rclpy.qos import (
     QoSHistoryPolicy, 
     QoSDurabilityPolicy
 )
+from rcl_interfaces.msg import ParameterDescriptor
 
 from px4_msgs.msg import (
     VehicleAttitude, 
@@ -31,7 +32,7 @@ class BaseDroneController(Node):
         default_orientation: list = [0.0,0.0,0.0],  # Ориентация задаётся списком [roll, pitch, yaw] радианы
     ):        
         super().__init__(f'drone_controller')
-        from rcl_interfaces.msg import ParameterDescriptor
+        
         self.drone_type = drone_type
         self.drone_id = drone_id
         
