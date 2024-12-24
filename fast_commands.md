@@ -87,25 +87,25 @@ ros2 topic echo /id_1_x500/out/inform_of_drone
 #!/bin/bash
 
 # G0: Сброс команд
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G0\", \"counter\": 0}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G0\", \"counter\": 0}'}"
 
 # G1: Армирование
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G1\", \"counter\": 1}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G1\", \"counter\": 1}'}"
 
 # G2: Разармирование
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G2\", \"counter\": 2}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G2\", \"counter\": 2}'}"
 
 # G3: Взлёт на высоту 2.0 м
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G3\", \"counter\": 3, \"altitude\": 2.0}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G3\", \"counter\": 3, \"altitude\": 2.0}'}"
 
 # G4: Посадка
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G4\", \"counter\": 4}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G4\", \"counter\": 4}'}"
 
 # G5: Удержание позиции
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G5\", \"counter\": 5}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G5\", \"counter\": 5}'}"
 
 # G6: Включение режима Offboard
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G6\", \"counter\": 6}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G6\", \"counter\": 6}'}"
 
 echo "Базовые команды G0-G6 отправлены."
 ```
@@ -118,14 +118,14 @@ echo "Базовые команды G0-G6 отправлены."
 ```bash
 #!/bin/bash
 
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G20\",
     \"counter\": 1,
-    \"x\": 10.0,
-    \"y\": 5.0,
-    \"z\": -10.0,
+    \"x\": 0.0,
+    \"y\": 0.0,
+    \"z\": 5.0,
     \"yaw\": 1.57,
     \"velocity\": 2.0,
     \"coordinate_system\": \"global_ENU\"
@@ -140,13 +140,13 @@ echo "Команда G20_MoveToPoint отправлена."
 ```bash
 #!/bin/bash
 
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G21\",
     \"counter\": 2,
-    \"start_point\": [0.0, 0.0, 0.0],
-    \"end_point\": [5.0, 10.0, -10.0],
+    \"start_point\": [0.0, 0.0, 20.0],
+    \"end_point\": [5.0, 10.0, 25.0],
     \"velocity\": 1.5,
     \"yaw\": 1.57,
     \"coordinate_system\": \"global_ENU\"
@@ -161,13 +161,13 @@ echo "Команда G21_LinearMove отправлена."
 ```bash
 #!/bin/bash
 
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G22\",
     \"counter\": 3,
-    \"start_point\": [5.0, 5.0, 0.0],
-    \"end_point\": [10.0, 10.0, 0.0],
+    \"start_point\": [5.0, 5.0, 20.0],
+    \"end_point\": [10.0, 10.0, 20.0],
     \"radius\": 10.0,
     \"direction\": \"CCW\",
     \"points_count\": 10,
@@ -183,7 +183,7 @@ echo "Команда G22_CircularTrajectory отправлена."
 ```bash
 #!/bin/bash
 
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G23\",
@@ -206,7 +206,7 @@ echo "Команда G23_Orbit отправлена."
 ```bash
 #!/bin/bash
 
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G24\",

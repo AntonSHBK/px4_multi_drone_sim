@@ -1,32 +1,32 @@
 ### G_code_command.md
 
-#### **How to Send G-Codes to the Appropriate Drones**
+#### **How to Send G-codes to the Appropriate Drones**
 
-G-code commands are used to control drone actions. These commands are transmitted in JSON format through ROS 2 topics and interpreted by the drone's commanders. This guide outlines the steps for sending standard and custom G-commands.
+G-code commands are used to control drone actions. These commands are transmitted in JSON format via ROS 2 topics and are interpreted by drone commanders. This guide describes the steps for sending standard and custom G-code commands.
 
 ---
 
-### **Basic Principle**
+### **Main Principle**
 
 1. **G-codes** are JSON commands that contain:
    - Command name (`name`).
    - Command counter (`counter`).
-   - Command parameters, depending on its type (e.g., position, velocity).
+   - Command parameters depending on its type (e.g., position, speed).
    
-2. **Command Topics:**
-   - Each command is sent to the corresponding drone's topic, for example: `/px4_1/command_json`.
-
-3. **Used Format:**
+2. **Command topics:**
+   - Each command is sent to the corresponding drone topic, e.g., `/id_1_x500/in/command_json`.
+   
+3. **Format used:**
    - Commands must be in JSON format.
 
 ---
 
-### **Examples of Sending G-Commands**
+### **Examples of Sending G-commands**
 
 ### **Basic Commands**
 
 #### **1. G0: Reset Commands**
-The `G0` command stops the execution of the current command, clears the command queue, and returns the drone to a safe state.
+The `G0` command stops the current command execution, clears the command queue, and returns the drone to a safe state.
 
 **Example JSON:**
 ```json
@@ -37,12 +37,12 @@ The `G0` command stops the execution of the current command, clears the command 
 ```
 
 **Description:**
-- Fully stops active commands.
+- Completely stops active commands.
 - Clears the command queue.
 
-**Example of Sending:**
+**Sending Example:**
 ```bash
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G0\", \"counter\": 0}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G0\", \"counter\": 0}'}"
 ```
 
 #### **2. Sending Basic Commands**
@@ -54,7 +54,7 @@ These commands control basic drone actions: arming, takeoff, landing, etc.
 #!/bin/bash
 
 # Topic for sending commands
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 # G1: Arming
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
@@ -68,7 +68,7 @@ ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"counter\": 2
 }'}"
 
-# G3: Takeoff to 2.0 meters altitude
+# G3: Takeoff to 2.0 meters
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G3\",
     \"counter\": 3,
@@ -96,32 +96,10 @@ ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
 echo "Basic commands sent."
 ```
 
----
-
-#### **3. Sending Movement Commands**
-
-##### **G20: Move to Point**
-
-Command to move the drone to a specified point.
-
----
-
-##### **G21: Linear Move**
-
-Command for linear movement between two points.
-
----
-
-##### **G22: Circular Trajectory**
-
-Command to perform circular motion.
-
----
-
 #### **General Recommendations**
 
 1. **Check Topics:**
-   - Before sending commands, ensure the drone's topic is active:
+   - Before sending commands, ensure the drone topic is active:
      ```bash
      ros2 topic list
      ```
@@ -130,7 +108,7 @@ Command to perform circular motion.
    - Use online JSON validators to check the syntax of commands.
 
 3. **Coordinate System Specification:**
-   - `coordinate_system` can be one of the following:
+   - `coordinate_system` can be one of:
      - `global_ENU`
      - `local_NED`
      - `local_ENU`
@@ -139,7 +117,7 @@ Command to perform circular motion.
 ---
 
 #### **1. G20: Move to Point**
-The `G20_MoveToPoint` command is used to move the drone to a specified point with optional orientation (`yaw`) and velocity.
+The `G20_MoveToPoint` command is used to move the drone to a specified point with an optional orientation (`yaw`) and velocity.
 
 **Example JSON:**
 ```json
@@ -156,17 +134,17 @@ The `G20_MoveToPoint` command is used to move the drone to a specified point wit
 ```
 
 **Parameter Description:**
-- `x`, `y`, `z`: Target point coordinates.
+- `x`, `y`, `z`: Target coordinates.
 - `yaw`: Orientation angle (in radians).
-- `velocity`: Movement speed (in m/s).
+- `velocity`: Movement speed (m/s).
 - `coordinate_system`: Coordinate system (`global_ENU`, `local_ENU`, etc.).
 
-**Example of Sending:**
+**Sending Example:**
 ```bash
 #!/bin/bash
 
-# Topic for sending the command
-TOPIC="/px4_1/command_json"
+# Topic for sending command
+TOPIC="/id_1_x500/in/command_json"
 
 # G20: MoveToPoint
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
@@ -184,7 +162,7 @@ echo "G20_MoveToPoint command sent."
 ---
 
 #### **2. G21: Linear Move**
-The `G21_LinearMove` command defines linear movement between two points.
+The `G21_LinearMove` command defines linear motion between two points.
 
 **Example JSON:**
 ```json
@@ -200,18 +178,18 @@ The `G21_LinearMove` command defines linear movement between two points.
 ```
 
 **Parameter Description:**
-- `start_point`: Starting point `[x, y, z]`.
-- `end_point`: Ending point `[x, y, z]`.
-- `velocity`: Movement speed (in m/s).
+- `start_point`: Start point `[x, y, z]`.
+- `end_point`: End point `[x, y, z]`.
+- `velocity`: Movement speed (m/s).
 - `yaw`: Orientation angle (in radians).
 - `coordinate_system`: Coordinate system.
 
-**Example of Sending:**
+**Sending Example:**
 ```bash
 #!/bin/bash
 
-# Topic for sending the command
-TOPIC="/px4_1/command_json"
+# Topic for sending command
+TOPIC="/id_1_x500/in/command_json"
 
 # G21: LinearMove
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
@@ -246,19 +224,19 @@ The `G22_CircularTrajectory` command defines movement along an arc.
 ```
 
 **Parameter Description:**
-- `start_point`: Starting point `[x, y, z]`.
-- `end_point`: Ending point `[x, y, z]`.
-- `radius`: Trajectory radius (in m).
-- `direction`: Direction (`CW` for clockwise, `CCW` for counterclockwise).
-- `points_count`: Number of points on the arc.
+- `start_point`: Start point `[x, y, z]`.
+- `end_point`: End point `[x, y, z]`.
+- `radius`: Trajectory radius (m).
+- `direction`: Direction (`CW` — clockwise, `CCW` — counterclockwise).
+- `points_count`: Number of points along the arc.
 - `coordinate_system`: Coordinate system.
 
-**Example of Sending:**
+**Sending Example:**
 ```bash
 #!/bin/bash
 
-# Topic for sending the commands
-TOPIC="/px4_1/command_json"
+# Topic for sending command
+TOPIC="/id_1_x500/in/command_json"
 
 # Sending G22_CircularTrajectory command
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
@@ -278,7 +256,7 @@ echo "G22_CircularTrajectory command sent to topic $TOPIC."
 ---
 
 #### **4. G23: Orbit Flight**
-The `G23_Orbit` command defines orbital flight around a specified point.
+The `G23_Orbit` command defines flight along an orbit around a specified point.
 
 **Example JSON:**
 ```json
@@ -297,14 +275,19 @@ The `G23_Orbit` command defines orbital flight around a specified point.
 
 **Parameter Description:**
 - `center_point`: Orbit center `[x, y, z]`.
-- `radius`: Orbit radius (in m).
-- `angular_velocity`: Angular velocity (in radians/s).
+- `radius`: Orbit radius (m).
+- `angular_velocity`: Angular velocity (radians/s).
 - `orbit_direction`: Direction (`CW`, `CCW`).
 - `yaw_mode`: Orientation mode (`fixed`, `facing_center`).
-- `duration`: Duration of the flight (in seconds).
+- `duration`: Duration (seconds).
 
-**Example of Sending:**
+**Sending Example:**
 ```bash
+#!/bin/bash
+
+# Topic for sending commands
+TOPIC="/id_1_x500/in/command_json"
+
 ros2 topic pub --once $TOPIC std_msgs/String "{data: '{
   \"name\": \"G23\",
   \"counter\": 1,

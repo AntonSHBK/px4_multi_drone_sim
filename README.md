@@ -7,6 +7,11 @@ This work is part of my dissertation research. In the future, detailed textual d
 <img src="docs/media/logo.webp" alt="Project Logo" width="600"/>  
 ---
 
+<video width="600" controls>
+  <source src="docs/media/one_control.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 <img src="docs/media/thre_drones_gz.jpg" alt="Three Drones in Gazebo" width="600"/>  
 
 <img src="docs/media/thre_drones_up_gz.jpg" alt="Three Drones from Above" width="600"/>  
@@ -15,7 +20,7 @@ This work is part of my dissertation research. In the future, detailed textual d
 
 ## **Documentation**
 
-For more details on system architecture, components, and usage, refer to the [Main Documentation](documentation/main.md).
+For more details on system architecture, components, and usage, refer to the [Main Documentation](docs/main.md).
 
 ---
 
@@ -77,7 +82,7 @@ New features, improvements, and bug fixes are being added regularly. Contributio
 
 ### **1. G20: Move to Point**
 ```bash
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{
     \"name\": \"G20\",
     \"counter\": 1,
     \"x\": 10.0,
@@ -91,7 +96,7 @@ ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{
 
 ### **2. G21: Linear Move**
 ```bash
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{
     \"name\": \"G21\",
     \"counter\": 2,
     \"start_point\": [0.0, 0.0, 0.0],

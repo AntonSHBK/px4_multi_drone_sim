@@ -13,7 +13,7 @@
    - Счётчик команды (`counter`).
    - Параметры команды, зависящие от её типа (например, позиция, скорость).
 2. **Топики для команд:**
-   - Каждая команда отправляется в соответствующий топик дрона, например: `/px4_1/command_json`.
+   - Каждая команда отправляется в соответствующий топик дрона, например: `/id_1_x500/in/command_json`.
 3. **Используемый формат:**
    - Команды должны быть в формате JSON.
 
@@ -40,8 +40,10 @@
 
 **Пример отправки:**
 ```bash
-ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\": \"G0\", \"counter\": 0}'}"
+ros2 topic pub --once /id_1_x500/in/command_json std_msgs/msg/String "{data: '{\"name\": \"G0\", \"counter\": 0}'}"
 ```
+
+
 
 #### **2. Отправка базовых команд**
 
@@ -52,7 +54,7 @@ ros2 topic pub --once /px4_1/command_json std_msgs/msg/String "{data: '{\"name\"
 #!/bin/bash
 
 # Топик для отправки команд
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 # G1: Армирование
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
@@ -93,34 +95,6 @@ ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
 
 echo "Базовые команды отправлены."
 ```
-
----
-
-#### **3. Отправка команд движения**
-
-##### **G20: Перемещение в точку**
-
-Команда для перемещения дрона к заданной точке.
-
-
-
----
-
-##### **G21: Линейное перемещение**
-
-Команда для линейного перемещения между двумя точками.
-
-
-
----
-
-##### **G22: Круговая траектория**
-
-Команда для выполнения кругового движения.
-
-
-
----
 
 #### **Общие рекомендации**
 
@@ -170,7 +144,7 @@ echo "Базовые команды отправлены."
 #!/bin/bash
 
 # Топик для отправки команды
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 # G20: MoveToPoint
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
@@ -215,7 +189,7 @@ echo "Команда G20_MoveToPoint отправлена."
 #!/bin/bash
 
 # Топик для отправки команды
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 # G21: LinearMove
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
@@ -262,7 +236,7 @@ echo "Команда G21_LinearMove отправлена."
 #!/bin/bash
 
 # Топик для отправки команд
-TOPIC="/px4_1/command_json"
+TOPIC="/id_1_x500/in/command_json"
 
 # Отправка команды G22_CircularTrajectory
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
@@ -309,6 +283,11 @@ echo "Команда G22_CircularTrajectory отправлена в топик $
 
 **Пример отправки:**
 ```bash
+#!/bin/bash
+
+# Топик для отправки команд
+TOPIC="/id_1_x500/in/command_json"
+
 ros2 topic pub --once $TOPIC std_msgs/String "{data: '{
   \"name\": \"G23\",
   \"counter\": 1,
