@@ -98,8 +98,8 @@ RUN git clone https://github.com/PX4/px4_msgs.git && \
     git checkout release/1.14 && \
     cd ..
 
-RUN source /opt/ros/humble/setup.bash && \
-    colcon build --packages-select px4_msgs
+# RUN source /opt/ros/humble/setup.bash && \
+#     colcon build --packages-select px4_msgs
 
 # **************************************************************************** #
 
