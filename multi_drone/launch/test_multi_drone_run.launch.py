@@ -10,6 +10,8 @@ from ament_index_python.packages import get_package_share_directory
 from multi_drone.utils.methods import load_yaml_params
 from multi_drone.scripts.runner import launch_robot, get_microxrce_agent_exec
 
+# Gazebo world name
+WORLD = 'walls'
 
 def generate_launch_description():    
     pkg_multi_drone = get_package_share_directory('multi_drone')
@@ -29,6 +31,7 @@ def generate_launch_description():
             launch_robot(
                 drone_id=robot['drone_id'],
                 drone_type=robot['drone_type'],
+                gz_world=WORLD,
                 spawn_position=robot['position'],
                 px4_autostart=robot['px4_autostart'],
                 px4_dir="/workspace/src/PX4-Autopilot/",

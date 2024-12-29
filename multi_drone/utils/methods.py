@@ -4,7 +4,7 @@ import yaml
 import os
 import logging
 
-def load_yaml_params(file_path):
+def load_yaml_params(file_path) -> dict:
     """Загружаем параметры из YAML файла с логированием ошибок"""
     if not os.path.isfile(file_path):
         logging.error(f"YAML файл не найден: {file_path}")

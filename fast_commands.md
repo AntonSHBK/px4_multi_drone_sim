@@ -125,7 +125,7 @@ ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"counter\": 1,
     \"x\": 0.0,
     \"y\": 0.0,
-    \"z\": 5.0,
+    \"z\": 6.0,
     \"yaw\": 1.57,
     \"velocity\": 2.0,
     \"coordinate_system\": \"global_ENU\"

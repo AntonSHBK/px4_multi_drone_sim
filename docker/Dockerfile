@@ -37,7 +37,9 @@ RUN apt-get update && apt-get install -y \
     tmux \
     tree \
     gnome-terminal \
-    dbus-x11 \    
+    dbus-x11 \ 
+    lsb-release \
+    gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 # Добавляем репозиторий ROS 2 и устанавливаем его
@@ -76,18 +78,27 @@ COPY . $WORKSPACE/px4_multi_drone_sim
 
 # **************************************************************************** #
 
+RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+
+RUN apt-get update && \
+    apt-get install -y gz-harmonic
+
+# **************************************************************************** #
+
 # Install PX4 packages
 
 RUN git clone https://github.com/PX4/PX4-Autopilot.git
 
 RUN cd ./PX4-Autopilot && \
-    git checkout v1.14.4 && \
+    git checkout v1.15.2 && \
     git submodule sync --recursive && \
     git submodule update --init --recursive
 
-RUN  ./PX4-Autopilot/Tools/setup/ubuntu.sh
+RUN  ./PX4-Autopilot/Tools/setup/ubuntu.sh --no-sim-tools
 
-RUN cd PX4-Autopilot && make
+RUN cd PX4-Autopilot && make px4_sitl
 
 # **************************************************************************** #
 
@@ -95,7 +106,7 @@ WORKDIR $WORKSPACE
 
 RUN git clone https://github.com/PX4/px4_msgs.git && \
     cd px4_msgs && \
-    git checkout release/1.14 && \
+    git checkout release/1.15 && \
     cd ..
 
 # RUN source /opt/ros/humble/setup.bash && \
@@ -113,7 +124,6 @@ RUN apt-get update && apt-get install -y \
     ros-humble-realtime-tools \
     ros-humble-ros-gz \
     ros-humble-xacro \
-    ros-humble-ros-gz-bridge \
     && rm -rf /var/lib/apt/lists/*
 
 # **************************************************************************** #

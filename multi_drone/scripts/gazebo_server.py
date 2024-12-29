@@ -22,7 +22,8 @@ def run_simulation_gazebo(
     custom_model_store: str = None,
     custom_model_store_other: List[str] = [],
     overwrite: bool = False,
-    headless: bool = False
+    headless: bool = False,
+    return_cmd: bool = False,
 ) -> ExecuteProcess:
     """
     Функция для настройки и запуска симуляции Gazebo с поддержкой кастомных моделей и миров.
@@ -101,14 +102,14 @@ def run_simulation_gazebo(
     # Формируем путь для ресурсов Gazebo
     custom_model_paths = []
 
-    world_path = f"{px4_model_store}/worlds/{world}.sdf"
+    world_path = f"{world}.sdf"
 
     if custom_model_store:
         custom_model_paths = [
             f"{custom_model_store}/models",
             f"{custom_model_store}/worlds"
         ]
-        world_path = f"{custom_model_store}/worlds/{world}.sdf"
+        # world_path = f"{custom_model_store}/worlds/{world}.sdf"
 
     custom_model_paths.extend([f"{path}/models:{path}/worlds" for path in custom_model_store_other])
 
@@ -118,28 +119,36 @@ def run_simulation_gazebo(
 
     print(f"Установлен GZ_SIM_RESOURCE_PATH: {gz_sim_resource_path}")
 
-    # Формируем команду запуска Gazebo
-    gz_cmd = f'gz sim -r {world_path}'
+    # Формируем команду запуска Gazebo    
+    gz_cmd = ['gz', 'sim', '-r', world_path]
 
     if headless:
-        gz_cmd = f'{gz_cmd} -s'
+        gz_cmd.append('-s')
+
+    # Формируем переменные окружения
+    gz_env = {'GZ_SIM_RESOURCE_PATH': gz_sim_resource_path}
 
     if gz_partition:
-        gz_cmd = f'GZ_PARTITION={gz_partition} {gz_cmd}'
+        gz_env['GZ_PARTITION'] = gz_partition
 
     if gz_ip:
-        gz_cmd = f'GZ_IP={gz_ip} {gz_cmd}'
+        gz_env['GZ_IP'] = gz_ip
+
+    if return_cmd:
+        # Возвращаем команду для отладки
+        return f"GZ_SIM_RESOURCE_PATH={gz_sim_resource_path} " + \
+               (f"GZ_PARTITION={gz_partition} " if gz_partition else '') + \
+               (f"GZ_IP={gz_ip} " if gz_ip else '') + \
+               ' '.join(gz_cmd)
 
     # Запуск Gazebo через ExecuteProcess
     gazebo_server = ExecuteProcess(
-        cmd=gz_cmd.split(),
+        cmd=gz_cmd,
         output='screen',
-        additional_env={
-            'GZ_SIM_RESOURCE_PATH': gz_sim_resource_path
-        }
+        additional_env=gz_env
     )
-
     return gazebo_server
 
 if __name__ == "__main__":
-    run_simulation_gazebo()
+    cmd = run_simulation_gazebo(return_cmd=True)
+    run(cmd)

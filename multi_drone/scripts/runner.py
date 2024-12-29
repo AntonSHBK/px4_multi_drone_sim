@@ -14,6 +14,7 @@ class PX4Process:
         self, 
         drone_id: int=1, 
         drone_type: str='x500', 
+        gz_world: str = 'default',
         spawn_position: list=[0, 0, 0, 0, 0, 0], 
         px4_autostart: int=4001,
         px4_dir: str = "/workspace/src/PX4-Autopilot/",
@@ -24,6 +25,7 @@ class PX4Process:
         """
         :param drone_id: ID дрона.
         :param drone_type: Тип дрона (например, 'x500').
+        :gz_world: Название мира gazebo куда подключаться
         :param spawn_position: Стартовая позиция дрона в формате "x,y,z,roll,pitch,yaw".
         :param px4_autostart: Автоматический запуск PX4 с заданным параметром.
         :param px4_dir: Путь к директории PX4.
@@ -31,6 +33,7 @@ class PX4Process:
         """
         self.drone_id = drone_id
         self.drone_type = drone_type
+        self.gz_world = gz_world
         self.spawn_position = ','.join(map(str, spawn_position))
         self.px4_autostart = px4_autostart
         self.px4_dir = px4_dir
@@ -47,6 +50,7 @@ class PX4Process:
             f'PX4_GZ_MODEL_POSE="{self.spawn_position}"',
             f'PX4_SYS_AUTOSTART={self.px4_autostart}',
             f'PX4_GZ_MODEL={self.drone_type}',
+            f'PX4_GZ_WORLD={self.gz_world}',
             f"{self.px4_dir}/build/px4_sitl_default/bin/px4",
             f'-i {self.drone_id}'
         ]
@@ -137,6 +141,7 @@ def get_microxrce_agent_exec(
 def launch_robot(
         drone_id: int=1, 
         drone_type: str='x500', 
+        gz_world: str = 'default',
         spawn_position: str=[0, 0, 0, 0, 0, 0],  
         px4_autostart: int = 4001,
         px4_dir: str = "/workspace/src/PX4-Autopilot/",
@@ -153,6 +158,7 @@ def launch_robot(
     px4_process = PX4Process(
         drone_id=drone_id,
         drone_type=drone_type,
+        gz_world=gz_world,
         spawn_position=spawn_position,
         px4_autostart=px4_autostart,
         px4_dir=px4_dir,
