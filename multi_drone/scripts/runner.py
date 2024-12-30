@@ -1,72 +1,124 @@
 #!/usr/bin/env python
 
-from typing import Literal
+from typing import List, Literal, Optional
 
 from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
 
 class PX4Process:
     """
-    Класс для создания процесса PX4 с возможностью выбора терминала или прямого запуска.
+    Класс для создания и управления процессами PX4 с гибкими настройками.
+
+    Параметры:
+    ----------
+    - drone_id : int
+        Уникальный идентификатор для экземпляра дрона. По умолчанию 1.
+    - drone_type : str
+        Тип дрона (например, 'x500'). По умолчанию 'x500'.
+    - gz_world : str
+        Название файла мира Gazebo. По умолчанию 'default'.
+    - spawn_position : List[float]
+        Начальная позиция и ориентация дрона в формате [x, y, z, roll, pitch, yaw].
+        По умолчанию [0, 0, 0, 0, 0, 0].
+    - px4_autostart : int
+        Идентификатор PX4 SYS_AUTOSTART для конфигурации. По умолчанию 4001.
+    - px4_dir : str
+        Путь к директории установки PX4. По умолчанию "/workspace/src/PX4-Autopilot/".
+    - px4_simulator : str
+        Тип симулятора (например, 'GZ' для Gazebo). По умолчанию 'GZ'.
+    - px4_model_name : Optional[str]
+        Имя существующей модели Gazebo, к которой подключается PX4. Взаимоисключается с px4_sim_model. Если оно указано, сценарий запуска пытается привязать новый экземпляр PX4 к ресурсу Gazebo с таким же именем.
+    - px4_sim_model : Optional[str]
+        Имя новой модели Gazebo, которая будет создана. Взаимоисключается с px4_model_name.  Если указано, сценарий запуска ищет модель в пути к ресурсам Gazebo, которая соответствует заданной переменной, создаёт её и привязывает к ней новый экземпляр PX4.
+    - px4_render_engine : Optional[str]
+        Механизм рендеринга для Gazebo. По умолчанию 'ogre'.
+    - terminal : Literal['gnome-terminal', 'xterm', 'konsole', 'bash']
+        Эмулятор терминала для запуска процесса. По умолчанию 'gnome-terminal'.
+
+    Исключения:
+    -----------
+    - ValueError:
+        Если px4_model_name и px4_sim_model указаны одновременно, так как они взаимно исключают друг друга.
+    - ValueError:
+        Если указанный эмулятор терминала не поддерживается.
     """
 
     def __init__(
-        self, 
-        drone_id: int=1, 
-        drone_type: str='x500', 
-        gz_world: str = 'default',
-        spawn_position: list=[0, 0, 0, 0, 0, 0], 
-        px4_autostart: int=4001,
+        self,
+        drone_id: int = 1,
+        gz_world: str = "default",        
+        px4_autostart: int = 4001,
         px4_dir: str = "/workspace/src/PX4-Autopilot/",
-        terminal: Literal[
-            'gnome-terminal', 'xterm', 'konsole', 'bash'
-        ]='gnome-terminal',
+        px4_simulator: str = "GZ",
+        px4_model_name: Optional[str] = None,
+        px4_sim_model: Optional[str] = "x500",
+        px4_gz_model_pose: List[float] = [0, 0, 0, 0, 0, 0],
+        px4_render_engine: Optional[str] = "ogre",
+        standalone: bool = True,
+        terminal: Literal["gnome-terminal", "xterm", "konsole", "bash"] = "gnome-terminal",
     ):
-        """
-        :param drone_id: ID дрона.
-        :param drone_type: Тип дрона (например, 'x500').
-        :gz_world: Название мира gazebo куда подключаться
-        :param spawn_position: Стартовая позиция дрона в формате "x,y,z,roll,pitch,yaw".
-        :param px4_autostart: Автоматический запуск PX4 с заданным параметром.
-        :param px4_dir: Путь к директории PX4.
-        :param terminal: Терминал для запуска процесса. Возможные значения: 'gnome-terminal', 'xterm', 'konsole', None.
-        """
+        if px4_model_name and px4_sim_model:
+            raise ValueError("px4_model_name и px4_sim_model взаимно исключают друг друга.")
+        
         self.drone_id = drone_id
-        self.drone_type = drone_type
         self.gz_world = gz_world
-        self.spawn_position = ','.join(map(str, spawn_position))
+        self.px4_gz_model_pose = ','.join(map(str, px4_gz_model_pose))
         self.px4_autostart = px4_autostart
         self.px4_dir = px4_dir
+        self.px4_simulator = px4_simulator
+        self.px4_model_name = px4_model_name
+        self.px4_sim_model = px4_sim_model
+        self.px4_render_engine = px4_render_engine
+        self.standalone = standalone
         self.terminal = terminal
 
     def create_process(self) -> ExecuteProcess:
         """
-        Создает процесс PX4.
+        Создаёт процесс PX4 с заданными переменными окружения.
 
-        :return: Объект ExecuteProcess для запуска PX4.
+        Возвращает:
+        -----------
+        ExecuteProcess:
+            Действие для запуска процесса PX4.
         """
-        base_cmd = [
-            'PX4_GZ_STANDALONE=1',
-            f'PX4_GZ_MODEL_POSE="{self.spawn_position}"',
-            f'PX4_SYS_AUTOSTART={self.px4_autostart}',
-            f'PX4_GZ_MODEL={self.drone_type}',
-            f'PX4_GZ_WORLD={self.gz_world}',
+        env_vars = [
+            f"PX4_SYS_AUTOSTART={self.px4_autostart}",
+            f"PX4_SIMULATOR={self.px4_simulator}",
+            f"PX4_GZ_WORLD={self.gz_world}",
+        ]
+        
+        if self.standalone:
+            env_vars.append(f"PX4_GZ_STANDALONE=1")
+
+        if self.px4_model_name:
+            env_vars.append(f"PX4_GZ_MODEL_NAME={self.px4_model_name}")
+        elif self.px4_sim_model:
+            env_vars.extend([
+                f"PX4_SIM_MODEL={self.px4_sim_model}",
+                f"PX4_GZ_MODEL_POSE={self.px4_gz_model_pose}",
+            ])
+
+        if self.px4_render_engine:
+            env_vars.append(f"PX4_GZ_SIM_RENDER_ENGINE={self.px4_render_engine}")
+
+        cmd = [
+            *env_vars,
             f"{self.px4_dir}/build/px4_sitl_default/bin/px4",
-            f'-i {self.drone_id}'
+            f"-i {self.drone_id}",
         ]
 
-        if self.terminal == 'gnome-terminal':
-            cmd = ['gnome-terminal', '--', 'bash', '-c', ' '.join(base_cmd)]
-        elif self.terminal == 'xterm':
-            cmd = ['xterm', '-hold', '-e', ' '.join(base_cmd)]
-        elif self.terminal == 'konsole':
-            cmd = ['konsole', '--hold', '-e', ' '.join(base_cmd)]
-        elif self.terminal == 'bash' or not self.terminal:
-            cmd = ['bash', '-c', ' '.join(base_cmd)]
+        if self.terminal == "gnome-terminal":
+            launch_cmd = ["gnome-terminal", "--", "bash", "-c", ' '.join(cmd)]
+        elif self.terminal == "xterm":
+            launch_cmd = ["xterm", "-hold", "-e", ' '.join(cmd)]
+        elif self.terminal == "konsole":
+            launch_cmd = ["konsole", "--hold", "-e", ' '.join(cmd)]
+        elif self.terminal == "bash":
+            launch_cmd = ["bash", "-c", ' '.join(cmd)]
         else:
             raise ValueError(f"Неподдерживаемый терминал: {self.terminal}")
 
-        return ExecuteProcess(cmd=cmd, output='screen')
+        return ExecuteProcess(cmd=launch_cmd, output="screen")
 
 
 class ControllerNode:
@@ -145,6 +197,10 @@ def launch_robot(
         spawn_position: str=[0, 0, 0, 0, 0, 0],  
         px4_autostart: int = 4001,
         px4_dir: str = "/workspace/src/PX4-Autopilot/",
+        px4_simulator: str = "GZ",
+        px4_model_name: Optional[str] = None,  
+        px4_render_engine: Optional[str] = "ogre",
+        standalone: bool = True,      
         terminal: Literal[
             'gnome-terminal', 'xterm', 'konsole', 'bash'
         ]='gnome-terminal',
@@ -157,11 +213,15 @@ def launch_robot(
     """    
     px4_process = PX4Process(
         drone_id=drone_id,
-        drone_type=drone_type,
         gz_world=gz_world,
-        spawn_position=spawn_position,
         px4_autostart=px4_autostart,
         px4_dir=px4_dir,
+        px4_simulator=px4_simulator,
+        px4_model_name=px4_model_name,
+        px4_sim_model=drone_type,
+        px4_gz_model_pose=spawn_position,
+        px4_render_engine=px4_render_engine,
+        standalone=standalone,
         terminal=terminal
     )
 

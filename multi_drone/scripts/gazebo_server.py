@@ -126,7 +126,9 @@ def run_simulation_gazebo(
         gz_cmd.append('-s')
 
     # Формируем переменные окружения
-    gz_env = {'GZ_SIM_RESOURCE_PATH': gz_sim_resource_path}
+    gz_env = {
+        'GZ_SIM_RESOURCE_PATH': gz_sim_resource_path
+    }
 
     if gz_partition:
         gz_env['GZ_PARTITION'] = gz_partition
