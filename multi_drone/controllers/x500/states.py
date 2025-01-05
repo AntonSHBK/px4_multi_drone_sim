@@ -60,6 +60,10 @@ class ArmingState(DroneState):
     """
     def enter(self):
         self.controller.log_info("Переход в состояние ARMING.")
+        self.controller.set_home_to_current_position()
+        self.controller.calibrate_gyroscope()
+        self.controller.calibrate_gyroscope()
+        self.controller.reset_ekf()
 
     def handle(self):
         if not self.params.flight_check:
@@ -83,8 +87,7 @@ class TakeoffState(DroneState):
     def enter(self):
         self.controller.log_info("Переход в состояние TAKEOFF.") 
         self.controller.takeoff()
-        # TODO: Нужно проверить где лучше делать установку домашней позиции
-        self.controller.set_home_to_current_position()
+        # TODO: Нужно проверить где лучше делать установку домашней позиции        
 
     def handle(self):
         if not self.params.flight_check:

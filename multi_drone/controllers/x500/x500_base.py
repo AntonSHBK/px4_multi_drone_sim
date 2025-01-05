@@ -39,6 +39,7 @@ class X500Params:
 
         self.flight_check: bool = False
         self.failsafe: bool = False
+        self.takeoff_hight = -3.5
 
     
     def update_params(self, msg: VehicleStatus):
@@ -143,7 +144,7 @@ class X500BaseController(BaseDroneController):
         self.publisher_inform_of_drone.publish(msg)
 
     def takeoff(self):
-        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param1=1.0, param7=5.0)
+        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param1=1.0, param7=self.params.takeoff_hight)
 
     def enable_offboard_mode(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 1.0, 6.0)
@@ -156,23 +157,35 @@ class X500BaseController(BaseDroneController):
     
     def disarm(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, param1=0.0)
-        
-    def take_off(self):        
-        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param1=1.0, param7=5.0)
     
     def land(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
         
-    # def stop(self):
-    #     VehicleCommand.PREFLIGHT_CALIBRATION_TEMPERATURE_CALIBRATION
-    #     pass
-    
     def stop_on_offboard(self):
         self.offboard_commander.update()
         
     def set_home_to_current_position(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_HOME, param1=1.0)
         
+    def calibrate_accelerometer(self):
+        """
+        Калибрует акселерометр, сбрасывая его смещения.
+        """
+        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_PREFLIGHT_CALIBRATION, param1=1.0)
+
+    def calibrate_gyroscope(self):
+        """
+        Калибрует гироскоп, сбрасывая его смещения.
+        """
+        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_PREFLIGHT_CALIBRATION, param2=1.0)
+        
+    def reset_ekf(self):
+        """
+        Сбрасывает фильтр EKF, чтобы заново инициализировать данные сенсоров.
+        """
+        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_PREFLIGHT_REBOOT_SHUTDOWN, param1=1.0)
+
+                
 
 class OffboardCommander:
     """
@@ -198,7 +211,7 @@ class OffboardCommander:
             controller.qos_profile_reliable
         )
         
-        self._position = np.array([np.nan, np.nan, np.nan])
+        self._position = np.array([0., 0., self._controller.params.takeoff_hight])
         self._velocity = np.array([np.nan, np.nan, np.nan])
         self._acceleration = np.array([np.nan, np.nan, np.nan])
         self._yaw = np.nan
