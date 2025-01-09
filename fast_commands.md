@@ -117,15 +117,14 @@ echo "Базовые команды G0-G6 отправлены."
 #### **1. Команда G20: Перемещение в точку**
 ```bash
 #!/bin/bash
-
-TOPIC="/id_1_x500/in/command_json"
+TOPIC="/id_1_custom_x500_1/in/command_json"
 
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G20\",
     \"counter\": 1,
     \"x\": 0.0,
     \"y\": 0.0,
-    \"z\": 6.0,
+    \"z\": 20.0,
     \"yaw\": 1.57,
     \"velocity\": 2.0,
     \"coordinate_system\": \"global_ENU\"
@@ -140,13 +139,30 @@ echo "Команда G20_MoveToPoint отправлена."
 ```bash
 #!/bin/bash
 
-TOPIC="/id_1_x500/in/command_json"
+TOPIC="/id_1_custom_x500_1/in/command_json"
 
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G21\",
     \"counter\": 2,
     \"start_point\": [0.0, 0.0, 20.0],
-    \"end_point\": [5.0, 10.0, 25.0],
+    \"end_point\": [5.0, -5.0, 20.0],
+    \"velocity\": 1.5,
+    \"yaw\": 1.57,
+    \"coordinate_system\": \"global_ENU\"
+}'}"
+
+echo "Команда G21_LinearMove отправлена."
+
+
+#!/bin/bash
+
+TOPIC="/id_1_custom_x500_1/in/command_json"
+
+ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
+    \"name\": \"G21\",
+    \"counter\": 2,
+    \"start_point\": [0.0, 0.0, 20.0],
+    \"end_point\": [-5.0, 0.0, 20.0],
     \"velocity\": 1.5,
     \"yaw\": 1.57,
     \"coordinate_system\": \"global_ENU\"
@@ -206,12 +222,12 @@ echo "Команда G23_Orbit отправлена."
 ```bash
 #!/bin/bash
 
-TOPIC="/id_1_x500/in/command_json"
+TOPIC="/id_1_custom_x500_1/in/command_json"
 
 ros2 topic pub --once $TOPIC std_msgs/msg/String "{data: '{
     \"name\": \"G24\",
     \"counter\": 5,
-    \"center_point\": [0.0, 0.0, 0.0],
+    \"center_point\": [0.0, 0.0, 20.0],
     \"radius_start\": 3.0,
     \"radius_end\": 8.0,
     \"height_change\": 10.0,

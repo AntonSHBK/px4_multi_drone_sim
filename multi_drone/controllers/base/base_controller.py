@@ -113,8 +113,8 @@ class BaseDroneController(Node):
         """
         return QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE
-            if reliable
-            else QoSReliabilityPolicy.BEST_EFFORT,
+                if reliable
+                else QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=depth,
