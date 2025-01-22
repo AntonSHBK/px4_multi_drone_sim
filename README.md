@@ -170,7 +170,7 @@ We welcome contributions! Feel free to open issues or submit pull requests.
 
 ## Citation
 
-```
+```bibtex
 @misc{px4_multi_drone_sim,
   author       = {Anton Pisarenko},
   title        = {PX4 Multi-Drone Simulation Project},
