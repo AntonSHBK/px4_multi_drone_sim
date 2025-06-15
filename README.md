@@ -7,9 +7,11 @@ This work is part of my dissertation research. In the future, detailed textual d
 <img src="docs/media/logo.webp" alt="Project Logo" width="600"/>  
 ---
 
-<img src="docs/media/one_control.gif" alt="PX4 Multi-Drone Control Demonstration 1" width="600">
+<img src="docs/media/drone_spiral.gif" alt="PX4 Multi-Drone Control Demonstration 1" width="600">
 
-<img src="docs/media/gz_rviz.gif" alt="PX4 Multi-Drone Control Demonstration 2" width="600">
+<img src="docs/media/one_control.gif" alt="PX4 Multi-Drone Control Demonstration 2" width="600">
+
+<img src="docs/media/gz_rviz.gif" alt="PX4 Multi-Drone Control Demonstration 3" width="600">
 
 ---
 
